@@ -1,0 +1,10 @@
+{
+  "build": {
+    "builder": "Docker"
+  },
+  "deploy": {
+    "healthcheckPath": "/api/like",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "ON_FAILURE"
+  }
+}

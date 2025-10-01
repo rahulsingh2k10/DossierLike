@@ -9,12 +9,13 @@ app.use(express.json());
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false }   // required on Railway Postgres
 });
 
-// GET /api/like -> returns { count: N }
+// GET /api/like
 app.get('/api/like', async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT likes FROM dossierlikes LIMIT 1');
@@ -26,7 +27,7 @@ app.get('/api/like', async (req, res) => {
   }
 });
 
-// POST /api/like -> increments and returns new count
+// POST /api/like
 app.post('/api/like', async (req, res) => {
   try {
     await pool.query('UPDATE dossierlikes SET likes = likes + 1');
