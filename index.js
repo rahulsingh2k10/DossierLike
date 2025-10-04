@@ -1,8 +1,49 @@
 const express = require('express');
+const cors = require('cors');
 const { Pool } = require('pg');
 
 const app = express();
 app.use(express.json());
+
+// --- CORS configuration ---
+// Allowed explicit origins (production)
+const ALLOWED_ORIGINS = [
+  'https://rahulsingh.ai',
+  'https://www.rahulsingh.ai'
+];
+
+// Helper to allow vercel preview hostnames, plus your allowed origins
+function corsOriginChecker(origin, callback) {
+  // If request has no origin (curl, server-to-server), allow it
+  if (!origin) return callback(null, true);
+
+  // Allow exact allowed origins
+  if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+
+  // Allow Vercel preview domains like something.vercel.app
+  try {
+    const url = new URL(origin);
+    if (url.hostname.endsWith('.vercel.app')) return callback(null, true);
+  } catch (e) {
+    // ignore parse error
+  }
+
+  // Otherwise block
+  return callback(new Error('Not allowed by CORS'));
+}
+
+// Use the cors middleware
+app.use(cors({
+  origin: corsOriginChecker,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  // If you need cookies/auth from browser, enable the next line:
+  // credentials: true
+}));
+
+// Ensure preflight requests are handled quickly
+app.options('*', cors({ origin: corsOriginChecker, methods: ['GET','POST','OPTIONS'] }));
+
 
 if (!process.env.DATABASE_URL) {
   console.warn('WARNING: DATABASE_URL not set. The app will fail to connect without it.');
