@@ -215,15 +215,15 @@ app.post('/api/views', async (req, res) => {
   console.log('POST /api/views HIT', new Date().toISOString());
 
   try {
-    const { subjectId } = getOrCreateSession(req, res);
+    const { subject_id } = getOrCreateSession(req, res);
     const ua = parseUserAgent(req);
     const ip = getClientIp(req);
     const geo = await getGeo(ip);
 
-    const viewId = crypto.randomUUID();
+    const view_id = crypto.randomUUID();
     const timezone = req.body?.timezone || 'Unknown';
 
-	console.log('ABOUT TO INSERT', {view_id,subjectId});
+	console.log('ABOUT TO INSERT', {view_id,subject_id});
     const result = await pool.query(
       `
       INSERT INTO portfolio_views_qa
