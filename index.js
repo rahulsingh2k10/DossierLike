@@ -220,10 +220,10 @@ app.post('/api/views', async (req, res) => {
     const ip = getClientIp(req);
     const geo = await getGeo(ip);
 
-    const view_id = crypto.randomUUID();
+    const viewId = crypto.randomUUID();
     const timezone = req.body?.timezone || 'Unknown';
 
-	console.log('ABOUT TO INSERT', {view_id,subjectId});
+	console.log('ABOUT TO INSERT', {viewId,subjectId});
     const result = await pool.query(
       `
       INSERT INTO portfolio_views_qa
