@@ -70,6 +70,65 @@ async function ensureTable() {
   `, ['global']);
 }
 
+
+const VIEWS_TABLE = 'portfolio_views_qa';
+
+// GET total views
+app.get('/api/views', async (req, res) => {
+  try {
+    const r = await pool.query(`SELECT COUNT(*) FROM ${VIEWS_TABLE}`);
+    res.json({
+      success: true,
+      view_count: Number(r.rows[0].count)
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+
+
+app.post('/api/views', async (req, res) => {
+  try {
+    const viewId = uuidv4();
+
+    await pool.query(
+      `
+      INSERT INTO ${VIEWS_TABLE} (view_id)
+      VALUES ($1)
+      `,
+      [viewId]
+    );
+
+    const r = await pool.query(`SELECT COUNT(*) FROM ${VIEWS_TABLE}`);
+
+    res.json({
+      success: true,
+      view_count: Number(r.rows[0].count)
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.get('/likes', async (req, res) => {
   try {
     const r = await pool.query('SELECT count FROM likes WHERE id = $1', ['global']);
