@@ -51,12 +51,13 @@ function corsOriginChecker(origin, callback) {
 // Use the cors middleware
 app.use(cors({
   origin: corsOriginChecker,
+  credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Ensure preflight requests are handled quickly
-app.options('*', cors({ origin: corsOriginChecker, methods: ['GET','POST','OPTIONS'] }));
+app.options('*', cors({ origin: corsOriginChecker, credentials: true, methods: ['GET','POST','OPTIONS'] }));
 
 
 /* =========================
@@ -119,7 +120,7 @@ function getOrCreateSession(req, res) {
   res.cookie('sid', jwtToken, {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
+    sameSite: 'none',
     maxAge: 365 * 24 * 60 * 60 * 1000
   });
 
@@ -211,6 +212,8 @@ app.get('/', (_, res) => res.send('ok'));
    Views API (EVENT BASED)
 ========================= */
 app.post('/api/views', async (req, res) => {
+  console.log('POST /api/views HIT', new Date().toISOString());
+
   try {
     const { subjectId } = getOrCreateSession(req, res);
     const ua = parseUserAgent(req);
@@ -220,7 +223,8 @@ app.post('/api/views', async (req, res) => {
     const viewId = crypto.randomUUID();
     const timezone = req.body?.timezone || 'Unknown';
 
-    await pool.query(
+	console.log('ABOUT TO INSERT', {view_id,subjectId});
+    const result = await pool.query(
       `
       INSERT INTO portfolio_views_qa
       (view_id, subject_id, os_family, browser_name, timezone,
@@ -240,6 +244,8 @@ app.post('/api/views', async (req, res) => {
         geo.network
       ]
     );
+
+	console.log('INSERT RESULT:', result.rowCount);
 
     res.json({ success: true });
   } catch (err) {
