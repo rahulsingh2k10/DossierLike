@@ -1,17 +1,32 @@
-const crypto = require('crypto');
+'use strict';
+
+/* =========================
+   Imports & App Setup
+========================= */
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const axios = require('axios');
+const UAParser = require('ua-parser-js');
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
-// --- CORS configuration ---
-// Allowed explicit origins (production)
+
+/* =========================
+   CORS (match production)
+========================= */
 const ALLOWED_ORIGINS = [
   'https://rahulsingh.ai',
   'https://www.rahulsingh.ai'
 ];
+
+
+
 
 // Helper to allow vercel preview hostnames, plus your allowed origins
 function corsOriginChecker(origin, callback) {
@@ -38,17 +53,19 @@ app.use(cors({
   origin: corsOriginChecker,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  // If you need cookies/auth from browser, enable the next line:
-  // credentials: true
 }));
 
 // Ensure preflight requests are handled quickly
 app.options('*', cors({ origin: corsOriginChecker, methods: ['GET','POST','OPTIONS'] }));
 
 
+/* =========================
+   Database
+========================= */
 if (!process.env.DATABASE_URL) {
   console.warn('WARNING: DATABASE_URL not set. The app will fail to connect without it.');
 }
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -56,128 +73,260 @@ const pool = new Pool({
   // ssl: { rejectUnauthorized: false }
 });
 
-async function ensureTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS likes (
-      id TEXT PRIMARY KEY,
-      count BIGINT NOT NULL DEFAULT 0
-    );
-  `);
-  // ensure a 'global' row exists
-  await pool.query(`
-    INSERT INTO likes (id, count)
-    VALUES ($1, 0)
-    ON CONFLICT (id) DO NOTHING
-  `, ['global']);
+
+/* =========================
+   Session & Identity
+========================= */
+const SECRET_KEY = process.env.SECRET_KEY;
+const SESSION_COOKIE = 'sid';
+const SESSION_DAYS = 30;
+
+function generateSessionId() {
+  return crypto.randomBytes(16).toString('hex');
 }
 
+function generateSubjectId(sessionId) {
+  return crypto
+    .createHmac('sha256', SECRET_KEY)
+    .update(sessionId)
+    .digest('hex');
+}
 
-const VIEWS_TABLE = 'portfolio_views_qa';
+function getOrCreateSession(req, res) {
+  const token = req.cookies[SESSION_COOKIE];
 
-// GET total views
-app.get('/api/views', async (req, res) => {
-  try {
-    const r = await pool.query(`SELECT COUNT(*) FROM ${VIEWS_TABLE}`);
-    res.json({
-      success: true,
-      view_count: Number(r.rows[0].count)
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'db error' });
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, SECRET_KEY);
+      return {
+        sessionId: decoded.sid,
+        subjectId: generateSubjectId(decoded.sid)
+      };
+    } catch {}
   }
-});
 
+  const sessionId = generateSessionId();
+  const jwtToken = jwt.sign(
+    { sid: sessionId },
+    SECRET_KEY,
+    { expiresIn: `${SESSION_DAYS}d` }
+  );
 
+  res.cookie(SESSION_COOKIE, jwtToken, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: true,
+    maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000
+  });
 
+  return {
+    sessionId,
+    subjectId: generateSubjectId(sessionId)
+  };
+}
+
+/* =========================
+   Client Metadata
+========================= */
+function parseUserAgent(req) {
+  const parser = new UAParser(req.headers['user-agent']);
+  const ua = parser.getResult();
+
+  return {
+    os_family: ua.os.name || 'Unknown',
+    browser_name: ua.browser.name || 'Unknown',
+    is_mobile:
+      ua.device.type === 'mobile' ||
+      ua.device.type === 'tablet'
+  };
+}
+
+function getClientIp(req) {
+  return (
+    req.headers['cf-connecting-ip'] ||
+    req.headers['true-client-ip'] ||
+    req.headers['x-real-ip'] ||
+    (req.headers['x-forwarded-for'] || '').split(',')[0] ||
+    req.socket.remoteAddress ||
+    'Unknown'
+  );
+}
+
+/* =========================
+   Geo Lookup (ip-api)
+========================= */
+async function getGeo(ip) {
+  if (!ip || ip === '127.0.0.1' || ip === '::1') {
+    return {
+      country: 'Unknown',
+      region: 'Unknown',
+      city: 'Unknown',
+      isp: 'Unknown',
+      network: 'Unknown'
+    };
+  }
+
+  try {
+    const { data } = await axios.get(
+      `http://ip-api.com/json/${ip}?fields=status,country,regionName,city,isp,mobile,hosting,proxy`,
+      { timeout: 5000 }
+    );
+
+    if (data.status !== 'success') throw new Error();
+
+    let network = 'Broadband';
+    if (data.mobile) network = 'Mobile';
+    else if (data.hosting) network = 'Hosting/Data Center';
+    else if (data.proxy) network = 'Proxy/VPN';
+
+    return {
+      country: data.country || 'Unknown',
+      region: data.regionName || 'Unknown',
+      city: data.city || 'Unknown',
+      isp: data.isp || 'Unknown',
+      network
+    };
+  } catch {
+    return {
+      country: 'Unknown',
+      region: 'Unknown',
+      city: 'Unknown',
+      isp: 'Unknown',
+      network: 'Unknown'
+    };
+  }
+}
+
+/* =========================
+   Health Check
+========================= */
+app.get('/', (_, res) => res.send('ok'));
+
+/* =========================
+   Views API (EVENT BASED)
+========================= */
 app.post('/api/views', async (req, res) => {
   try {
-	const viewId = crypto.randomUUID();
+    const { subjectId } = getOrCreateSession(req, res);
+    const ua = parseUserAgent(req);
+    const ip = getClientIp(req);
+    const geo = await getGeo(ip);
+
+    const viewId = crypto.randomUUID();
+    const timezone = req.body?.timezone || 'Unknown';
 
     await pool.query(
       `
-      INSERT INTO ${VIEWS_TABLE} (view_id)
-      VALUES ($1)
+      INSERT INTO portfolio_views_qa
+      (view_id, subject_id, os_family, browser_name, timezone,
+       ip_country, ip_region, ip_city, ip_isp, ip_network_type)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       `,
-      [viewId]
+      [
+        viewId,
+        subjectId,
+        ua.os_family,
+        ua.browser_name,
+        timezone,
+        geo.country,
+        geo.region,
+        geo.city,
+        geo.isp,
+        geo.network
+      ]
     );
 
-    const r = await pool.query(`SELECT COUNT(*) FROM ${VIEWS_TABLE}`);
-
-    res.json({
-      success: true,
-      view_count: Number(r.rows[0].count)
-    });
+    res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'db error' });
+    console.error('View tracking failed:', err);
+    res.status(500).json({ success: false });
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.get('/likes', async (req, res) => {
+/* =========================
+   Views Count
+========================= */
+app.get('/api/views', async (_, res) => {
   try {
-    const r = await pool.query('SELECT count FROM likes WHERE id = $1', ['global']);
-    const count = r.rows[0] ? Number(r.rows[0].count) : 0;
-    res.json({ count });
+    const r = await pool.query('SELECT COUNT(*) FROM portfolio_views_qa');
+    res.json({ success: true, view_count: Number(r.rows[0].count) });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'db error' });
+    res.status(500).json({ success: false });
   }
 });
 
-app.post('/likes', async (req, res) => {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    // Try to atomically increment; this pattern is robust and simple
-    const update = await client.query(
-      'UPDATE likes SET count = count + 1 WHERE id = $1 RETURNING count',
-      ['global']
-    );
-    let row;
-    if (update.rowCount === 0) {
-      const insert = await client.query(
-        'INSERT INTO likes (id, count) VALUES ($1, 1) RETURNING count',
-        ['global']
-      );
-      row = insert.rows[0];
-    } else {
-      row = update.rows[0];
-    }
-    await client.query('COMMIT');
-    res.json({ count: Number(row.count) });
-  } catch (err) {
-    await client.query('ROLLBACK').catch(()=>{});
-    console.error(err);
-    res.status(500).json({ error: 'db error' });
-  } finally {
-    client.release();
-  }
-});
-
-// health
-app.get('/', (req, res) => res.send('ok'));
-
+/* =========================
+   Start Server
+========================= */
 const port = process.env.PORT || 3000;
-ensureTable()
-  .then(() => app.listen(port, ()=> console.log(`Listening on ${port}`)))
-  .catch(err => {
-    console.error('Failed to ensure table:', err);
-    process.exit(1);
-  });
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 
+// 
+// 
+// app.get('/likes', async (req, res) => {
+//   try {
+//     const r = await pool.query('SELECT count FROM likes WHERE id = $1', ['global']);
+//     const count = r.rows[0] ? Number(r.rows[0].count) : 0;
+//     res.json({ count });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'db error' });
+//   }
+// });
+// 
+// app.post('/likes', async (req, res) => {
+//   const client = await pool.connect();
+//   try {
+//     await client.query('BEGIN');
+//     // Try to atomically increment; this pattern is robust and simple
+//     const update = await client.query(
+//       'UPDATE likes SET count = count + 1 WHERE id = $1 RETURNING count',
+//       ['global']
+//     );
+//     let row;
+//     if (update.rowCount === 0) {
+//       const insert = await client.query(
+//         'INSERT INTO likes (id, count) VALUES ($1, 1) RETURNING count',
+//         ['global']
+//       );
+//       row = insert.rows[0];
+//     } else {
+//       row = update.rows[0];
+//     }
+//     await client.query('COMMIT');
+//     res.json({ count: Number(row.count) });
+//   } catch (err) {
+//     await client.query('ROLLBACK').catch(()=>{});
+//     console.error(err);
+//     res.status(500).json({ error: 'db error' });
+//   } finally {
+//     client.release();
+//   }
+// });
+// 
+// // health
+// app.get('/', (req, res) => res.send('ok'));
+// 
+// const port = process.env.PORT || 3000;
+// ensureTable()
+//   .then(() => app.listen(port, ()=> console.log(`Listening on ${port}`)))
+//   .catch(err => {
+//     console.error('Failed to ensure table:', err);
+//     process.exit(1);
+//   });
