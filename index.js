@@ -228,7 +228,7 @@ app.post('/api/views', async (req, res) => {
 	console.log('ABOUT TO INSERT', {viewId,subjectId});
     const result = await pool.query(
       `
-      INSERT INTO portfolio_views_qa
+      INSERT INTO portfolio_views
       (view_id, subject_id, os_family, browser_name, timezone,
        ip_country, ip_region, ip_city, ip_isp, ip_network_type)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -261,7 +261,7 @@ app.post('/api/views', async (req, res) => {
 ========================= */
 app.get('/api/views', async (_, res) => {
   try {
-    const r = await pool.query('SELECT COUNT(*) FROM portfolio_views_qa');
+    const r = await pool.query('SELECT COUNT(*) FROM portfolio_views');
     res.json({ success: true, view_count: Number(r.rows[0].count) });
   } catch (err) {
     res.status(500).json({ success: false });
