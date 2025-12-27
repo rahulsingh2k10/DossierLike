@@ -46,12 +46,36 @@ function corsOriginChecker(origin, callback) {
   return callback(new Error('Not allowed by CORS'));
 }
 
+function getAllowedOrigin(origin) {
+  if (!origin) return '*';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  try {
+    const url = new URL(origin);
+    if (url.hostname.endsWith('.vercel.app')) return origin;
+  } catch (e) {}
+  return ALLOWED_ORIGINS[0]; // fallback
+}
+
+// Handle preflight FIRST
+app.options('*', (req, res) => {
+  res.set({
+    'Access-Control-Allow-Origin': getAllowedOrigin(req.headers.origin),
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400'
+  });
+  res.status(200).end();
+});
+
+
 // Use the cors middleware
 app.use(cors({
   origin: corsOriginChecker,
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400
 }));
 
 // Ensure preflight requests are handled quickly
@@ -267,16 +291,6 @@ app.get('/api/views', async (_, res) => {
     res.status(500).json({ success: false });
   }
 });
-
-
-app.options('/api/contact', (req, res) => {
-  res.sendStatus(200);
-});
-
-app.post('/api/contact', async (req, res) => {
-  res.json({ success: true, message: 'Message received' });
-});
-
 
 /* =========================
    Start Server
