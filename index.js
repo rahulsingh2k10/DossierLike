@@ -268,6 +268,16 @@ app.get('/api/views', async (_, res) => {
   }
 });
 
+
+app.options('/api/contact', (req, res) => {
+  res.sendStatus(200);
+});
+
+app.post('/api/contact', async (req, res) => {
+  res.json({ success: true, message: 'Message received' });
+});
+
+
 /* =========================
    Start Server
 ========================= */
