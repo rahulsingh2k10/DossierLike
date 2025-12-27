@@ -93,7 +93,7 @@ function generateSubjectId(sessionId) {
 }
 
 function getOrCreateSession(req, res) {
-  const token = req.cookies[SESSION_COOKIE];
+  const token = req.cookies.sid;
 
   if (token) {
     try {
@@ -102,21 +102,25 @@ function getOrCreateSession(req, res) {
         sessionId: decoded.sid,
         subjectId: generateSubjectId(decoded.sid)
       };
-    } catch {}
+    } catch {
+      // fall through and re-create
+    }
   }
 
-  const sessionId = generateSessionId();
+  // Create new session (first-ever visit OR cookie expired)
+  const sessionId = crypto.randomBytes(16).toString('hex');
+
   const jwtToken = jwt.sign(
     { sid: sessionId },
     SECRET_KEY,
-    { expiresIn: `${SESSION_DAYS}d` }
+    { expiresIn: '365d' }
   );
 
-  res.cookie(SESSION_COOKIE, jwtToken, {
+  res.cookie('sid', jwtToken, {
     httpOnly: true,
-    sameSite: 'lax',
     secure: true,
-    maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000
+    sameSite: 'lax',
+    maxAge: 365 * 24 * 60 * 60 * 1000
   });
 
   return {
@@ -124,6 +128,7 @@ function getOrCreateSession(req, res) {
     subjectId: generateSubjectId(sessionId)
   };
 }
+
 
 /* =========================
    Client Metadata
