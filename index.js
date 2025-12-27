@@ -1,7 +1,7 @@
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(express.json());
@@ -92,7 +92,7 @@ app.get('/api/views', async (req, res) => {
 
 app.post('/api/views', async (req, res) => {
   try {
-    const viewId = uuidv4();
+	const viewId = crypto.randomUUID();
 
     await pool.query(
       `
