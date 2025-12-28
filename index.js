@@ -1,7 +1,7 @@
 'use strict';
 
 /* =========================
-   IMPORTS AND APP SETUP
+   Imports & App Setup
 ========================= */
 const express = require('express');
 const cors = require('cors');
@@ -17,38 +17,15 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* =========================
-   ENVIRONMENT VALIDATION
-   Ensures all required env
-   variables are present
+   CORS (match production)
 ========================= */
-const {
-  DATABASE_URL,
-  SECRET_KEY,
-  PORT = 3000
-} = process.env;
-
-console.log('BOOTSTRAP STARTED', DATABASE_URL, SECRET_KEY, PORT);
-
-if (!DATABASE_URL || !SECRET_KEY) {
-  console.error('FATAL: DATABASE_URL or SECRET_KEY missing');
-
-  throw new Error('Missing required environment variables');
-}
-
-/* =========================
-   CORS CONFIGURATION
-   Controls allowed origins
-   including Vercel previews
-========================= */
-const ALLOWED_ORIGINS = new Set([
+const ALLOWED_ORIGINS = [
   'https://rahulsingh.ai',
   'https://www.rahulsingh.ai'
-]);
+];
 
 /* =========================
-   CORS ORIGIN VALIDATOR
-   Dynamically validates
-   incoming request origins
+   Helper to allow vercel preview hostnames, plus your allowed origins
 ========================= */
 function corsOriginChecker(origin, callback) {
   if (!origin) return callback(null, true);
@@ -61,36 +38,45 @@ function corsOriginChecker(origin, callback) {
   } catch (e) {
   }
 
-  console.error('CORS BLOCKED:', origin);
-
   return callback(new Error('Not allowed by CORS'));
 }
 
+/* =========================
+   Custom CORS middleware that echoes origin
+========================= */
 app.use(cors({
   origin: corsOriginChecker,
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 /* =========================
-   DATABASE CONFIGURATION
-   Initializes PostgreSQL
-   connection pool
+   Database
 ========================= */
-const pool = new Pool({ connectionString: DATABASE_URL });
+if (!process.env.DATABASE_URL) {
+  console.warn('WARNING: DATABASE_URL not set. The app will fail to connect without it.');
+}
+
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // Railway Postgres often works with default SSL settings; if you need SSL set:
+  // ssl: { rejectUnauthorized: false }
+});
+
 
 /* =========================
-   SESSION AND IDENTITY
-   Cookie-based session
-   management helpers
+   Session & Identity
 ========================= */
+const SECRET_KEY = process.env.SECRET_KEY;
+const SESSION_COOKIE = 'sid';
+const SESSION_DAYS = 30;
 
-/* =========================
-   Subject ID GENERATOR
-   Creates a stable,
-   anonymized identifier
-========================= */
+function generateSessionId() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
 function generateSubjectId(sessionId) {
   return crypto
     .createHmac('sha256', SECRET_KEY)
@@ -98,27 +84,28 @@ function generateSubjectId(sessionId) {
     .digest('hex');
 }
 
-/* =========================
-   SESSION RESOLVER
-   Reads existing session
-   or creates a new one
-========================= */
 function getOrCreateSession(req, res) {
   const token = req.cookies.sid;
 
   if (token) {
     try {
-      const { sid } = jwt.verify(token, SECRET_KEY);
-      return { subjectId: generateSubjectId(sid) };
+      const decoded = jwt.verify(token, SECRET_KEY);
+      return {
+        sessionId: decoded.sid,
+        subjectId: generateSubjectId(decoded.sid)
+      };
     } catch {
-      // Invalid or expired token – regenerate
+      // fall through and re-create
     }
   }
 
   const sessionId = crypto.randomBytes(16).toString('hex');
-  const jwtToken = jwt.sign({ sid: sessionId }, SECRET_KEY, {
-    expiresIn: '365d'
-  });
+
+  const jwtToken = jwt.sign(
+    { sid: sessionId },
+    SECRET_KEY,
+    { expiresIn: '365d' }
+  );
 
   res.cookie('sid', jwtToken, {
     httpOnly: true,
@@ -127,33 +114,29 @@ function getOrCreateSession(req, res) {
     maxAge: 365 * 24 * 60 * 60 * 1000
   });
 
-  return { subjectId: generateSubjectId(sessionId) };
-}
-
-/* =========================
-   CLIENT METADATA
-   Browser and OS detection
-========================= */
-
-/* =========================
-   USER-AGENT PARSER
-   Extracts OS and browser
-   information from request
-========================= */
-function parseUserAgent(req) {
-  const ua = new UAParser(req.headers['user-agent']).getResult();
-
   return {
-    os_family: ua.os.name ?? 'Unknown',
-    browser_name: ua.browser.name ?? 'Unknown'
+    sessionId,
+    subjectId: generateSubjectId(sessionId)
   };
 }
 
+
 /* =========================
-   CLIENT IP RESOLVER
-   Determines real client
-   IP behind proxies/CDNs
+   Client Metadata
 ========================= */
+function parseUserAgent(req) {
+  const parser = new UAParser(req.headers['user-agent']);
+  const ua = parser.getResult();
+
+  return {
+    os_family: ua.os.name || 'Unknown',
+    browser_name: ua.browser.name || 'Unknown',
+    is_mobile:
+      ua.device.type === 'mobile' ||
+      ua.device.type === 'tablet'
+  };
+}
+
 function getClientIp(req) {
   return (
     req.headers['cf-connecting-ip'] ||
@@ -166,33 +149,17 @@ function getClientIp(req) {
 }
 
 /* =========================
-   GEO LOCATION LOOKUP
-   Resolves IP-based
-   location and network
-========================= */
-
-/* =========================
-   EMPTY GEO FALLBACK
-   Used when lookup fails
-========================= */
-function emptyGeo() {
-  return {
-    country: 'Unknown',
-    region: 'Unknown',
-    city: 'Unknown',
-    isp: 'Unknown',
-    network: 'Unknown'
-  };
-}
-
-/* =========================
-   GEO RESOLVER
-   Queries external service
-   for IP geo metadata
+   Geo Lookup (ip-api)
 ========================= */
 async function getGeo(ip) {
   if (!ip || ip === '127.0.0.1' || ip === '::1') {
-    return emptyGeo();
+    return {
+      country: 'Unknown',
+      region: 'Unknown',
+      city: 'Unknown',
+      isp: 'Unknown',
+      network: 'Unknown'
+    };
   }
 
   try {
@@ -201,9 +168,7 @@ async function getGeo(ip) {
       { timeout: 5000 }
     );
 
-    if (data.status !== 'success') {
-      return emptyGeo();
-    }
+    if (data.status !== 'success') throw new Error();
 
     let network = 'Broadband';
     if (data.mobile) network = 'Mobile';
@@ -211,32 +176,30 @@ async function getGeo(ip) {
     else if (data.proxy) network = 'Proxy/VPN';
 
     return {
-      country: data.country ?? 'Unknown',
-      region: data.regionName ?? 'Unknown',
-      city: data.city ?? 'Unknown',
-      isp: data.isp ?? 'Unknown',
+      country: data.country || 'Unknown',
+      region: data.regionName || 'Unknown',
+      city: data.city || 'Unknown',
+      isp: data.isp || 'Unknown',
       network
     };
   } catch {
-    return emptyGeo();
+    return {
+      country: 'Unknown',
+      region: 'Unknown',
+      city: 'Unknown',
+      isp: 'Unknown',
+      network: 'Unknown'
+    };
   }
 }
 
 /* =========================
-   ROUTES
-   HTTP API endpoints
-========================= */
-
-/* =========================
-   HEALTH CHECK ENDPOINT
-   Used for uptime probes
+   Health Check
 ========================= */
 app.get('/', (_, res) => res.send('ok'));
 
 /* =========================
-   VIEW TRACKING ENDPOINT
-   Persists view metadata
-   per visit/session
+   Views API (EVENT BASED)
 ========================= */
 app.post('/api/views', async (req, res) => {
   console.log('POST /api/views HIT', new Date().toISOString());
@@ -280,10 +243,9 @@ app.post('/api/views', async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+
 /* =========================
-   VIEW COUNT ENDPOINT
-   Returns total number
-   of tracked views
+   Views Count
 ========================= */
 app.get('/api/views', async (_, res) => {
   try {
@@ -295,9 +257,9 @@ app.get('/api/views', async (_, res) => {
 });
 
 /* =========================
-   SERVER STARTUP
-   Boots HTTP server
+   Start Server
 ========================= */
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
 });
