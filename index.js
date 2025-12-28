@@ -141,22 +141,18 @@ function getOrCreateSession(req, res) {
   };
 }
 
-
-
-
-
-
-
-
-
-
+/* =========================
+   CLIENT METADATA
+   Browser and OS detection
+========================= */
 
 /* =========================
-   Client Metadata
+   USER-AGENT PARSER
+   Extracts OS and browser
+   information from request
 ========================= */
 function parseUserAgent(req) {
-  const parser = new UAParser(req.headers['user-agent']);
-  const ua = parser.getResult();
+  const ua = new UAParser(req.headers['user-agent']).getResult();
 
   return {
     os_family: ua.os.name || 'Unknown',
@@ -167,6 +163,11 @@ function parseUserAgent(req) {
   };
 }
 
+/* =========================
+   CLIENT IP RESOLVER
+   Determines real client
+   IP behind proxies/CDNs
+========================= */
 function getClientIp(req) {
   return (
     req.headers['cf-connecting-ip'] ||
@@ -179,17 +180,33 @@ function getClientIp(req) {
 }
 
 /* =========================
-   Geo Lookup (ip-api)
+   GEO LOCATION LOOKUP
+   Resolves IP-based
+   location and network
+========================= */
+
+/* =========================
+   EMPTY GEO FALLBACK
+   Used when lookup fails
+========================= */
+function emptyGeo() {
+  return {
+    country: 'Unknown',
+    region: 'Unknown',
+    city: 'Unknown',
+    isp: 'Unknown',
+    network: 'Unknown'
+  };
+}
+
+/* =========================
+   GEO RESOLVER
+   Queries external service
+   for IP geo metadata
 ========================= */
 async function getGeo(ip) {
   if (!ip || ip === '127.0.0.1' || ip === '::1') {
-    return {
-      country: 'Unknown',
-      region: 'Unknown',
-      city: 'Unknown',
-      isp: 'Unknown',
-      network: 'Unknown'
-    };
+    return emptyGeo();
   }
 
   try {
@@ -198,7 +215,9 @@ async function getGeo(ip) {
       { timeout: 5000 }
     );
 
-    if (data.status !== 'success') throw new Error();
+    if (data.status !== 'success') {
+      return emptyGeo();
+    }
 
     let network = 'Broadband';
     if (data.mobile) network = 'Mobile';
@@ -206,22 +225,21 @@ async function getGeo(ip) {
     else if (data.proxy) network = 'Proxy/VPN';
 
     return {
-      country: data.country || 'Unknown',
-      region: data.regionName || 'Unknown',
-      city: data.city || 'Unknown',
-      isp: data.isp || 'Unknown',
+      country: data.country ?? 'Unknown',
+      region: data.regionName ?? 'Unknown',
+      city: data.city ?? 'Unknown',
+      isp: data.isp ?? 'Unknown',
       network
     };
   } catch {
-    return {
-      country: 'Unknown',
-      region: 'Unknown',
-      city: 'Unknown',
-      isp: 'Unknown',
-      network: 'Unknown'
-    };
+    return emptyGeo();
   }
 }
+
+
+
+
+
 
 /* =========================
    Health Check
