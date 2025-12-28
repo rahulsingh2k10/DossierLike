@@ -29,15 +29,19 @@ const {
 
 console.log('BOOTSTRAP STARTED');
 
+/* =========================
+   DATABASE
+========================= */
+if (!DATABASE_URL || !SECRET_KEY) {
+  console.warn('FATAL: DATABASE_URL or SECRET_KEY missing');
 
-
-
-
-
-
+  throw new Error('Missing required environment variables');
+}
 
 /* =========================
-   CORS (match production)
+   CORS CONFIGURATION
+   Controls allowed origins
+   including Vercel previews
 ========================= */
 const ALLOWED_ORIGINS = [
   'https://rahulsingh.ai',
@@ -71,12 +75,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-/* =========================
-   Database
-========================= */
-if (!DATABASE_URL) {
-  console.warn('WARNING: DATABASE_URL not set. The app will fail to connect without it.');
-}
+
 
 
 const pool = new Pool({
