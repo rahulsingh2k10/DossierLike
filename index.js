@@ -237,14 +237,19 @@ async function getGeo(ip) {
 }
 
 
-
-
-
+/* =========================
+   ROUTES
+   HTTP API endpoints
+========================= */
 
 /* =========================
-   Health Check
+   HEALTH CHECK ENDPOINT
+   Used for uptime probes
 ========================= */
 app.get('/', (_, res) => res.send('ok'));
+
+
+
 
 /* =========================
    Views API (EVENT BASED)
@@ -304,10 +309,11 @@ app.get('/api/views', async (_, res) => {
   }
 });
 
+
 /* =========================
-   Start Server
+   SERVER STARTUP
+   Boots HTTP server
 ========================= */
-// const port = PORT;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
