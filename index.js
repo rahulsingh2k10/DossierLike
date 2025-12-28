@@ -298,7 +298,9 @@ app.post('/api/views', async (req, res) => {
 });
 
 /* =========================
-   Views Count
+   VIEW COUNT ENDPOINT
+   Returns total number
+   of tracked views
 ========================= */
 app.get('/api/views', async (_, res) => {
   try {
@@ -308,7 +310,6 @@ app.get('/api/views', async (_, res) => {
     res.status(500).json({ success: false });
   }
 });
-
 
 /* =========================
    SERVER STARTUP
