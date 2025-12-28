@@ -28,63 +28,28 @@ const ALLOWED_ORIGINS = [
    Helper to allow vercel preview hostnames, plus your allowed origins
 ========================= */
 function corsOriginChecker(origin, callback) {
-  // If request has no origin (curl, server-to-server), allow it
   if (!origin) return callback(null, true);
 
-  // Allow exact allowed origins
   if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
 
-  // Allow Vercel preview domains like something.vercel.app
   try {
     const url = new URL(origin);
     if (url.hostname.endsWith('.vercel.app')) return callback(null, true);
   } catch (e) {
-    // ignore parse error
   }
 
-  // Otherwise block
   return callback(new Error('Not allowed by CORS'));
 }
 
-function getAllowedOrigin(origin) {
-  if (!origin) return '*';
-  if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  try {
-    const url = new URL(origin);
-    if (url.hostname.endsWith('.vercel.app')) return origin;
-  } catch (e) {}
-  return ALLOWED_ORIGINS[0]; // fallback
-}
-
-// Handle preflight FIRST
-app.options('*', (req, res) => {
-  res.set({
-    'Access-Control-Allow-Origin': getAllowedOrigin(req.headers.origin),
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Max-Age': '86400'
-  });
-  res.status(200).end();
-});
-
-
-// Use the cors middleware
+/* =========================
+   Custom CORS middleware that echoes origin
+========================= */
 app.use(cors({
   origin: corsOriginChecker,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  maxAge: 86400
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
-
-// Ensure preflight requests are handled quickly
-app.options('*', cors({ 
-  origin: corsOriginChecker,
-  credentials: true,
-  methods: ['GET','POST','OPTIONS']
-}));
-
 
 /* =========================
    Database
@@ -134,7 +99,6 @@ function getOrCreateSession(req, res) {
     }
   }
 
-  // Create new session (first-ever visit OR cookie expired)
   const sessionId = crypto.randomBytes(16).toString('hex');
 
   const jwtToken = jwt.sign(
