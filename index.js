@@ -17,6 +17,26 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* =========================
+   ENVIRONMENT VALIDATION
+   Ensures all required env
+   variables are present
+========================= */
+const {
+  DATABASE_URL,
+  SECRET_KEY,
+  PORT = 3000
+} = process.env;
+
+console.log('BOOTSTRAP STARTED');
+
+
+
+
+
+
+
+
+/* =========================
    CORS (match production)
 ========================= */
 const ALLOWED_ORIGINS = [
@@ -54,13 +74,13 @@ app.use(cors({
 /* =========================
    Database
 ========================= */
-if (!process.env.DATABASE_URL) {
+if (!DATABASE_URL) {
   console.warn('WARNING: DATABASE_URL not set. The app will fail to connect without it.');
 }
 
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: DATABASE_URL,
   // Railway Postgres often works with default SSL settings; if you need SSL set:
   // ssl: { rejectUnauthorized: false }
 });
@@ -69,7 +89,7 @@ const pool = new Pool({
 /* =========================
    Session & Identity
 ========================= */
-const SECRET_KEY = process.env.SECRET_KEY;
+// const SECRET_KEY = SECRET_KEY;
 const SESSION_COOKIE = 'sid';
 const SESSION_DAYS = 30;
 
@@ -259,7 +279,7 @@ app.get('/api/views', async (_, res) => {
 /* =========================
    Start Server
 ========================= */
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`🚀 Server running on port ${port}`);
+// const port = PORT;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
