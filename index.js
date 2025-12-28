@@ -81,47 +81,24 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const pool = new Pool({
-  connectionString: DATABASE_URL,
-  // Railway Postgres often works with default SSL settings; if you need SSL set:
-  // ssl: { rejectUnauthorized: false }
-});
-
+/* =========================
+   DATABASE CONFIGURATION
+   Initializes PostgreSQL
+   connection pool
+========================= */
+const pool = new Pool({ connectionString: DATABASE_URL });
 
 /* =========================
-   Session & Identity
+   SESSION AND IDENTITY
+   Cookie-based session
+   management helpers
 ========================= */
-// const SECRET_KEY = SECRET_KEY;
-const SESSION_COOKIE = 'sid';
-const SESSION_DAYS = 30;
 
-function generateSessionId() {
-  return crypto.randomBytes(16).toString('hex');
-}
-
+/* =========================
+   Subject ID GENERATOR
+   Creates a stable,
+   anonymized identifier
+========================= */
 function generateSubjectId(sessionId) {
   return crypto
     .createHmac('sha256', SECRET_KEY)
@@ -129,28 +106,27 @@ function generateSubjectId(sessionId) {
     .digest('hex');
 }
 
+/* =========================
+   SESSION RESOLVER
+   Reads existing session
+   or creates a new one
+========================= */
 function getOrCreateSession(req, res) {
   const token = req.cookies.sid;
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, SECRET_KEY);
-      return {
-        sessionId: decoded.sid,
-        subjectId: generateSubjectId(decoded.sid)
-      };
+      const { sid } = jwt.verify(token, SECRET_KEY);
+      return { subjectId: generateSubjectId(sid) };
     } catch {
-      // fall through and re-create
+      // Invalid or expired token – regenerate
     }
   }
 
   const sessionId = crypto.randomBytes(16).toString('hex');
-
-  const jwtToken = jwt.sign(
-    { sid: sessionId },
-    SECRET_KEY,
-    { expiresIn: '365d' }
-  );
+  const jwtToken = jwt.sign({ sid: sessionId }, SECRET_KEY, {
+    expiresIn: '365d'
+  });
 
   res.cookie('sid', jwtToken, {
     httpOnly: true,
@@ -164,6 +140,15 @@ function getOrCreateSession(req, res) {
     subjectId: generateSubjectId(sessionId)
   };
 }
+
+
+
+
+
+
+
+
+
 
 
 /* =========================
