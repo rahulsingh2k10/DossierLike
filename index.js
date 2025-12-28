@@ -27,7 +27,7 @@ const {
   PORT = 3000
 } = process.env;
 
-console.log('BOOTSTRAP STARTED');
+console.log('BOOTSTRAP STARTED', DATABASE_URL, SECRET_KEY, PORT);
 
 if (!DATABASE_URL || !SECRET_KEY) {
   console.error('FATAL: DATABASE_URL or SECRET_KEY missing');
