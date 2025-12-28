@@ -49,9 +49,13 @@ const ALLOWED_ORIGINS = [
 ];
 
 /* =========================
-   Helper to allow vercel preview hostnames, plus your allowed origins
+   CORS ORIGIN VALIDATOR
+   Dynamically validates
+   incoming request origins
 ========================= */
 function corsOriginChecker(origin, callback) {
+  console.log('CORS ORIGIN CHECKER', origin);
+
   if (!origin) return callback(null, true);
 
   if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
@@ -61,6 +65,8 @@ function corsOriginChecker(origin, callback) {
     if (url.hostname.endsWith('.vercel.app')) return callback(null, true);
   } catch (e) {
   }
+
+  console.error('CORS BLOCKED:', origin);
 
   return callback(new Error('Not allowed by CORS'));
 }
@@ -74,6 +80,26 @@ app.use(cors({
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
