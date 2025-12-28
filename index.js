@@ -236,7 +236,6 @@ async function getGeo(ip) {
   }
 }
 
-
 /* =========================
    ROUTES
    HTTP API endpoints
@@ -248,11 +247,10 @@ async function getGeo(ip) {
 ========================= */
 app.get('/', (_, res) => res.send('ok'));
 
-
-
-
 /* =========================
-   Views API (EVENT BASED)
+   VIEW TRACKING ENDPOINT
+   Persists view metadata
+   per visit/session
 ========================= */
 app.post('/api/views', async (req, res) => {
   console.log('POST /api/views HIT', new Date().toISOString());
