@@ -236,12 +236,19 @@ app.get('/', (_, res) => res.send('ok'));
    per visit/session
 ========================= */
 app.post('/api/views', async (req, res) => {
+  console.log('POST /api/views HIT', new Date().toISOString());
+
   try {
     const { subjectId } = getOrCreateSession(req, res);
     const ua = parseUserAgent(req);
-    const geo = await getGeo(getClientIp(req));
+    const ip = getClientIp(req);
+    const geo = await getGeo(ip);
 
-    await pool.query(
+    const viewId = crypto.randomUUID();
+    const timezone = req.body?.timezone || 'Unknown';
+
+	console.log('ABOUT TO INSERT', {viewId,subjectId});
+    const result = await pool.query(
       `
       INSERT INTO portfolio_views
       (view_id, subject_id, os_family, browser_name, timezone,
@@ -249,11 +256,11 @@ app.post('/api/views', async (req, res) => {
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       `,
       [
-        crypto.randomUUID(),
+        viewId,
         subjectId,
         ua.os_family,
         ua.browser_name,
-        req.body?.timezone ?? 'Unknown',
+        timezone,
         geo.country,
         geo.region,
         geo.city,
@@ -262,13 +269,14 @@ app.post('/api/views', async (req, res) => {
       ]
     );
 
+	console.log('INSERT RESULT:', result.rowCount);
+
     res.json({ success: true });
   } catch (err) {
     console.error('View tracking failed:', err);
     res.status(500).json({ success: false });
   }
 });
-
 /* =========================
    VIEW COUNT ENDPOINT
    Returns total number
@@ -276,11 +284,9 @@ app.post('/api/views', async (req, res) => {
 ========================= */
 app.get('/api/views', async (_, res) => {
   try {
-    const { rows } = await pool.query(
-      'SELECT COUNT(*) FROM portfolio_views'
-    );
-    res.json({ success: true, view_count: Number(rows[0].count) });
-  } catch {
+    const r = await pool.query('SELECT COUNT(*) FROM portfolio_views');
+    res.json({ success: true, view_count: Number(r.rows[0].count) });
+  } catch (err) {
     res.status(500).json({ success: false });
   }
 });
