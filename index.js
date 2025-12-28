@@ -27,7 +27,11 @@ const {
   PORT = 3000
 } = process.env;
 
+console.log('BOOTSTRAP STARTED');
+
 if (!DATABASE_URL || !SECRET_KEY) {
+  console.error('FATAL: DATABASE_URL or SECRET_KEY missing');
+
   throw new Error('Missing required environment variables');
 }
 
@@ -49,18 +53,17 @@ const ALLOWED_ORIGINS = new Set([
 function corsOriginChecker(origin, callback) {
   if (!origin) return callback(null, true);
 
-  if (ALLOWED_ORIGINS.has(origin)) return callback(null, true);
+  if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
 
   try {
-    const { hostname } = new URL(origin);
-    if (hostname.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-  } catch {
-    // Invalid origin format
+    const url = new URL(origin);
+    if (url.hostname.endsWith('.vercel.app')) return callback(null, true);
+  } catch (e) {
   }
 
-  callback(new Error('Not allowed by CORS'));
+  console.error('CORS BLOCKED:', origin);
+
+  return callback(new Error('Not allowed by CORS'));
 }
 
 app.use(cors({
