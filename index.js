@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const axios = require('axios');
 const UAParser = require('ua-parser-js');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,9 @@ app.use(cookieParser());
 const {
   DATABASE_URL,
   SECRET_KEY,
+  GMAIL_ADDRESS = 'rahulsingh2k10@gmail.com',
+  GMAIL_APP_PASSWORD = 'tzve cfau szby nema',
+  RECIPIENT_EMAIL = 'rahulsingh2k10@gmail.com',
   PORT = 3000
 } = process.env;
 
@@ -87,6 +91,18 @@ app.use(cors({
    connection pool
 ========================= */
 const pool = new Pool({ connectionString: DATABASE_URL });
+
+/* =========================
+   EMAIL CONFIGURATION
+   Gmail SMTP transporter
+========================= */
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: GMAIL_ADDRESS,
+    pass: GMAIL_APP_PASSWORD
+  }
+});
 
 /* =========================
    SESSION AND IDENTITY
@@ -237,6 +253,83 @@ async function getGeo(ip) {
 }
 
 /* =========================
+   CONTACT FORM EMAIL
+   Sends notification to owner
+========================= */
+async function sendContactFormEmail(name, email, subject, message) {
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+            New Contact Form Submission
+          </h2>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Contact Information</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+            <p><strong>Subject:</strong> ${subject}</p>
+          </div>
+          <div style="background: #fff; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0;">
+            <h3 style="color: #2c3e50; margin-top: 0;">Message</h3>
+            <p style="white-space: pre-wrap;">${message}</p>
+          </div>
+          <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 6px; font-size: 14px; color: #666;">
+            <p><strong>Sent on:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `Portfolio Contact Form <${GMAIL_ADDRESS}>`,
+    to: RECIPIENT_EMAIL,
+    replyTo: `${name} <${email}>`,
+    subject: `Portfolio Contact: ${subject}`,
+    html: htmlContent,
+    text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`
+  });
+}
+
+/* =========================
+   AUTO-REPLY EMAIL
+   Sends confirmation to sender
+========================= */
+async function sendAutoReplyEmail(recipientEmail, recipientName) {
+  const htmlContent = `
+    <html>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+            Thank you for reaching out!
+          </h2>
+          <p>Hi ${recipientName},</p>
+          <p>Thank you for contacting me through my portfolio website. I've received your message and will get back to you as soon as possible.</p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2c3e50; margin-top: 0;">What happens next?</h3>
+            <ul style="padding-left: 20px;">
+              <li>I'll review your message carefully</li>
+              <li>I typically respond within 24-48 hours</li>
+              <li>If it's urgent, feel free to connect with me on LinkedIn</li>
+            </ul>
+          </div>
+          <p>Best regards,<br><strong>Rahul Singh</strong><br>Principal Software Engineer</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `Rahul Singh <${GMAIL_ADDRESS}>`,
+    to: recipientEmail,
+    subject: 'Thank you for your message - Rahul Singh',
+    html: htmlContent,
+    text: `Hi ${recipientName},\n\nThank you for contacting me. I'll get back to you within 24-48 hours.\n\nBest regards,\nRahul Singh`
+  });
+}
+
+/* =========================
    ROUTES
    HTTP API endpoints
 ========================= */
@@ -306,6 +399,51 @@ app.get('/api/views', async (_, res) => {
     res.json({ success: true, view_count: Number(r.rows[0].count) });
   } catch (err) {
     res.status(500).json({ success: false });
+  }
+});
+
+/* =========================
+   CONTACT FORM ENDPOINT
+   Handles form submissions
+   and sends email notifications
+========================= */
+app.post('/api/contact', async (req, res) => {
+  console.log('POST /api/contact HIT', new Date().toISOString());
+
+  try {
+    const { name, email, subject, message } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'All fields are required'
+      });
+    }
+
+    // Send notification email to owner
+    await sendContactFormEmail(name, email, subject, message);
+    console.log(`Contact form email sent from ${name} <${email}>`);
+
+    // Send auto-reply to sender (don't fail if this fails)
+    try {
+      await sendAutoReplyEmail(email, name);
+      console.log(`Auto-reply sent to ${email}`);
+    } catch (autoReplyErr) {
+      console.error('Auto-reply failed:', autoReplyErr.message);
+    }
+
+    res.json({
+      status: 'success',
+      message: 'Thank you for your message! I\'ll get back to you soon.'
+    });
+
+  } catch (err) {
+    console.error('Contact form error:', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to send message. Please try again or contact me directly.'
+    });
   }
 });
 
