@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const axios = require('axios');
 const UAParser = require('ua-parser-js');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const app = express();
 app.use(express.json());
@@ -25,8 +25,7 @@ app.use(cookieParser());
 const {
   DATABASE_URL,
   SECRET_KEY,
-  GMAIL_ADDRESS = 'rahulsingh2k10@gmail.com',
-  GMAIL_APP_PASSWORD = 'tzve cfau szby nema',
+  RESEND_API_KEY,
   RECIPIENT_EMAIL = 'rahulsingh2k10@gmail.com',
   PORT = 3000
 } = process.env;
@@ -94,15 +93,9 @@ const pool = new Pool({ connectionString: DATABASE_URL });
 
 /* =========================
    EMAIL CONFIGURATION
-   Gmail SMTP transporter
+   Resend API client
 ========================= */
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: GMAIL_ADDRESS,
-    pass: GMAIL_APP_PASSWORD
-  }
-});
+const resend = new Resend(RESEND_API_KEY);
 
 /* =========================
    SESSION AND IDENTITY
@@ -254,7 +247,6 @@ async function getGeo(ip) {
 
 /* =========================
    CONTACT FORM EMAIL
-   Sends notification to owner
 ========================= */
 async function sendContactFormEmail(name, email, subject, message) {
   const htmlContent = `
@@ -282,19 +274,17 @@ async function sendContactFormEmail(name, email, subject, message) {
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `Portfolio Contact Form <${GMAIL_ADDRESS}>`,
+  await resend.emails.send({
+    from: 'Portfolio <rahulsingh2k10@gmail.com>', // Use your verified domain later
     to: RECIPIENT_EMAIL,
-    replyTo: `${name} <${email}>`,
+    replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
-    html: htmlContent,
-    text: `New Contact Form Submission\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\nMessage:\n${message}`
+    html: htmlContent
   });
 }
 
 /* =========================
    AUTO-REPLY EMAIL
-   Sends confirmation to sender
 ========================= */
 async function sendAutoReplyEmail(recipientEmail, recipientName) {
   const htmlContent = `
@@ -320,12 +310,11 @@ async function sendAutoReplyEmail(recipientEmail, recipientName) {
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `Rahul Singh <${GMAIL_ADDRESS}>`,
+  await resend.emails.send({
+    from: 'Rahul Singh <rahulsingh2k10@gmail.com>', // Use your verified domain later
     to: recipientEmail,
     subject: 'Thank you for your message - Rahul Singh',
-    html: htmlContent,
-    text: `Hi ${recipientName},\n\nThank you for contacting me. I'll get back to you within 24-48 hours.\n\nBest regards,\nRahul Singh`
+    html: htmlContent
   });
 }
 
