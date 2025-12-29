@@ -311,7 +311,7 @@ async function sendAutoReplyEmail(recipientEmail, recipientName) {
   `;
 
   await resend.emails.send({
-    from: 'Rahul Singh <onboarding@resend.dev>', // Use your verified domain later
+    from: 'Rahul Singh <rahulsingh2k10@gmail.com>', // Use your verified domain later
     to: recipientEmail,
     subject: 'Thank you for your message - Rahul Singh',
     html: htmlContent
