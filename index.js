@@ -12,6 +12,9 @@ const crypto = require('crypto');
 const axios = require('axios');
 const UAParser = require('ua-parser-js');
 const { Resend } = require('resend');
+import { render } from '@react-email/render';
+import ContactFormEmail from './emails/ContactFormEmail.js';
+
 
 const app = express();
 app.use(express.json());
@@ -248,38 +251,58 @@ async function getGeo(ip) {
 /* =========================
    CONTACT FORM EMAIL
 ========================= */
+// async function sendContactFormEmail(name, email, subject, message) {
+//   const htmlContent = `
+//     <html>
+//       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+//         <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+//           <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+//             New Contact Form Submission
+//           </h2>
+//           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+//             <h3 style="color: #2c3e50; margin-top: 0;">Contact Information</h3>
+//             <p><strong>Name:</strong> ${name}</p>
+//             <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+//             <p><strong>Subject:</strong> ${subject}</p>
+//           </div>
+//           <div style="background: #fff; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0;">
+//             <h3 style="color: #2c3e50; margin-top: 0;">Message</h3>
+//             <p style="white-space: pre-wrap;">${message}</p>
+//           </div>
+//           <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 6px; font-size: 14px; color: #666;">
+//             <p><strong>Sent on:</strong> ${new Date().toLocaleString()}</p>
+//           </div>
+//         </div>
+//       </body>
+//     </html>
+//   `;
+// 
+//   await resend.emails.send({
+//     from: 'Portfolio <no-reply@rahulsingh.ai>',
+//     to: RECIPIENT_EMAIL,
+//     replyTo: email,
+//     subject: `Portfolio Contact: ${subject}`,
+//     html: htmlContent
+//   });
+// }
+
 async function sendContactFormEmail(name, email, subject, message) {
-  const htmlContent = `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-            New Contact Form Submission
-          </h2>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Contact Information</h3>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-            <p><strong>Subject:</strong> ${subject}</p>
-          </div>
-          <div style="background: #fff; padding: 20px; border-left: 4px solid #3498db; margin: 20px 0;">
-            <h3 style="color: #2c3e50; margin-top: 0;">Message</h3>
-            <p style="white-space: pre-wrap;">${message}</p>
-          </div>
-          <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 6px; font-size: 14px; color: #666;">
-            <p><strong>Sent on:</strong> ${new Date().toLocaleString()}</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
+  const htmlContent = render(
+    ContactFormEmail({
+      name,
+      email,
+      subject,
+      message,
+      year: new Date().getFullYear(),
+    })
+  );
 
   await resend.emails.send({
     from: 'Portfolio <no-reply@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
-    html: htmlContent
+    html: htmlContent,
   });
 }
 
@@ -318,6 +341,7 @@ async function sendAutoReplyEmail(recipientEmail, recipientName) {
     html: htmlContent
   });
 }
+
 
 /* =========================
    ROUTES
