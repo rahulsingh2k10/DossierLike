@@ -176,22 +176,6 @@ function parseUserAgent(req) {
   };
 }
 
-// =========================
-//    CLIENT IP RESOLVER
-//    Determines real client
-//    IP behind proxies/CDNs
-// ========================= */
-// function getClientIp(req) {
-//   return (
-//     req.headers['cf-connecting-ip'] ||
-//     req.headers['true-client-ip'] ||
-//     req.headers['x-real-ip'] ||
-//     (req.headers['x-forwarded-for'] || '').split(',')[0] ||
-//     req.socket.remoteAddress ||
-//     'Unknown'
-//   );
-// }
-
 /* =========================
    CLIENT IP RESOLVER
    Determines real client
@@ -199,14 +183,12 @@ function parseUserAgent(req) {
    Priority: Custom header > Cloudflare > Standard headers
 ========================= */
 function getClientIp(req) {
-  // 1. Custom header from our Vercel proxy (highest priority)
   const realClientIp = req.headers['x-real-client-ip'];
   if (realClientIp && realClientIp !== 'Unknown') {
     console.log('IP from x-real-client-ip:', realClientIp);
     return realClientIp.trim();
   }
 
-  // 2. Cloudflare headers (if using Cloudflare)
   const cfIp = req.headers['cf-connecting-ip'];
   if (cfIp) {
     console.log('IP from cf-connecting-ip:', cfIp);
@@ -219,32 +201,28 @@ function getClientIp(req) {
     return trueClientIp.trim();
   }
 
-  // 3. X-Real-IP (set by some proxies)
   const xRealIp = req.headers['x-real-ip'];
   if (xRealIp) {
     console.log('IP from x-real-ip:', xRealIp);
     return xRealIp.trim();
   }
 
-  // 4. X-Forwarded-For (first IP in the chain is usually the client)
   const xff = req.headers['x-forwarded-for'];
   if (xff) {
     const ips = xff.split(',').map(ip => ip.trim());
-    // Filter out private/internal IPs and known CDN ranges
     for (const ip of ips) {
       if (!isPrivateOrCdnIp(ip)) {
         console.log('IP from x-forwarded-for:', ip);
         return ip;
       }
     }
-    // If all IPs are proxies, return the first one
     console.log('IP from x-forwarded-for (first):', ips[0]);
     return ips[0];
   }
 
-  // 5. Direct connection (fallback)
   const socketIp = req.socket?.remoteAddress || 'Unknown';
   console.log('IP from socket:', socketIp);
+
   return socketIp;
 }
 
@@ -285,32 +263,6 @@ function isPrivateOrCdnIp(ip) {
   
   return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* =========================
    GEO LOCATION LOOKUP
