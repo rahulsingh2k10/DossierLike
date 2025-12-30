@@ -69,7 +69,7 @@ export default function AutoReplyEmail({
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'I have received your email and will review it at the earliest opportunity. In the meantime, I’d be happy to connect with you on LinkedIn so we can stay in touch, exchange insights, and learn more about each other’s work.
+            'I have received your email and will review it at the earliest opportunity. In the meantime, I’d be happy to connect with you on LinkedIn so we can stay in touch, exchange insights, and learn more about each other’s work.'
           ),
 
           React.createElement(
