@@ -275,7 +275,7 @@ async function sendContactFormEmail(name, email, subject, message) {
   `;
 
   await resend.emails.send({
-    from: 'Portfolio <no-reply@rahulsingh.ai>', // Use your verified domain later
+    from: 'Portfolio <no-reply@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
@@ -311,9 +311,9 @@ async function sendAutoReplyEmail(recipientEmail, recipientName) {
   `;
 
   await resend.emails.send({
-    from: 'Rahul Singh <onboarding@resend.dev>', // Use your verified domain later
+    from: 'Portfolio <no-reply@rahulsingh.ai>',
     to: recipientEmail,
-    replyTo: email,
+    replyTo: RECIPIENT_EMAIL,
     subject: 'Thank you for your message - Rahul Singh',
     html: htmlContent
   });
@@ -417,6 +417,8 @@ app.post('/api/contact', async (req, res) => {
 
     // Send auto-reply to sender (don't fail if this fails)
     try {
+      console.log('Sending Email To::', email);
+
       await sendAutoReplyEmail(email, name);
       console.log(`Auto-reply sent to ${email}`);
     } catch (autoReplyErr) {
