@@ -32,22 +32,29 @@ export default function ContactFormEmail({
         { style: styles.container },
 
         /* ========= Header ========= */
-        React.createElement(
-          Section,
-          { style: styles.header },
-          React.createElement(Img, {
-            src: 'https://rahulsingh.ai/logo.png',
-            width: 48,
-            height: 48,
-            alt: 'Rahul Singh',
-            style: styles.logo,
-          }),
-          React.createElement(
-            Heading,
-            { style: styles.heading },
-            'New Contact Submission'
-          )
-        ),
+		React.createElement(
+		  Section,
+		  { style: styles.header },
+		  React.createElement(
+			'div',
+			{ style: styles.headerInner },
+		
+			React.createElement(Img, {
+			  src: 'https://rahulsingh.ai/logo.png',
+			  width: 48,
+			  height: 48,
+			  alt: 'Rahul Singh',
+			  style: styles.logo,
+			}),
+		
+			React.createElement(
+			  Heading,
+			  { style: styles.heading },
+			  'New Form Submission'
+			)
+		  )
+		)
+
 
         /* ========= Content ========= */
         React.createElement(
@@ -126,20 +133,25 @@ const styles = {
   /* Header */
   header: {
     padding: '20px 24px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
     borderBottom: '1px solid #e5e7eb',
+    textAlign: 'center',
+  },
+
+  headerInner: {
+    display: 'inline-block',
+    textAlign: 'center',
   },
 
   logo: {
-    borderRadius: '6px',
+    display: 'inline-block',
+    marginBottom: '8px',
   },
-
+  
   heading: {
+    display: 'inline-block',
     margin: 0,
     fontSize: '18px',
-    fontWeight: 600,
+  fontWeight: 600,
     color: '#111827',
   },
 
