@@ -3,19 +3,19 @@
 /* =========================
    IMPORTS AND APP SETUP
 ========================= */
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const axios = require('axios');
-const UAParser = require('ua-parser-js');
-const { Resend } = require('resend');
+import express from 'express';
+import cors from 'cors';
+import pg from 'pg';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import axios from 'axios';
+import UAParser from 'ua-parser-js';
+import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContactFormEmail from './emails/ContactFormEmail.js';
 
-
+const { Pool } = pg;
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
