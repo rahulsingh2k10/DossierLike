@@ -22,18 +22,7 @@ export default function ContactFormEmail({
   return React.createElement(
     Html,
     { lang: 'en' },
-    React.createElement(
-      Head,
-      null,
-      React.createElement('meta', {
-        name: 'color-scheme',
-        content: 'light dark',
-      }),
-      React.createElement('meta', {
-        name: 'supported-color-schemes',
-        content: 'light dark',
-      })
-    ),
+    React.createElement(Head, null),
     React.createElement(
       Body,
       { style: styles.body },
@@ -42,31 +31,31 @@ export default function ContactFormEmail({
         Container,
         { style: styles.container },
 
-        /* ================= Header ================= */
+        /* ========= Header ========= */
         React.createElement(
           Section,
           { style: styles.header },
           React.createElement(Img, {
             src: 'https://rahulsingh.ai/logo.png',
-            width: 32,
-            height: 32,
+            width: 36,
+            height: 36,
             alt: 'Rahul Singh',
             style: styles.logo,
           }),
           React.createElement(
             Heading,
-            { style: styles.title },
-            'New Contact Message'
+            { style: styles.heading },
+            'New Contact Submission'
           )
         ),
 
-        /* ================= Content ================= */
+        /* ========= Content ========= */
         React.createElement(
           Section,
           { style: styles.content },
 
-          field('Name', name),
-          field(
+          infoRow('Name', name),
+          infoRow(
             'Email',
             React.createElement(
               Link,
@@ -74,7 +63,7 @@ export default function ContactFormEmail({
               email
             )
           ),
-          field('Subject', subject),
+          infoRow('Subject', subject),
 
           React.createElement(Hr, { style: styles.divider }),
 
@@ -85,7 +74,7 @@ export default function ContactFormEmail({
           )
         ),
 
-        /* ================= Footer ================= */
+        /* ========= Footer ========= */
         React.createElement(
           Section,
           { style: styles.footer },
@@ -105,18 +94,18 @@ export default function ContactFormEmail({
   );
 }
 
-/* ================= Helper ================= */
-function field(label, value) {
+/* ========= Helper ========= */
+function infoRow(label, value) {
   return React.createElement(
     Section,
-    { style: styles.field },
+    { style: styles.row },
     React.createElement(Text, { style: styles.label }, label),
     React.createElement(Text, { style: styles.value }, value)
   );
 }
 
-/* ================= Styles ================= */
-const BRAND = '#4f46e5'; // your original theme color
+/* ========= Theme ========= */
+const BRAND = '#4f46e5'; // your original indigo theme
 
 const styles = {
   body: {
@@ -129,7 +118,7 @@ const styles = {
   container: {
     maxWidth: '600px',
     backgroundColor: '#ffffff',
-    borderRadius: '12px',
+    borderRadius: '10px',
     overflow: 'hidden',
     border: '1px solid #e5e7eb',
   },
@@ -137,17 +126,17 @@ const styles = {
   /* Header */
   header: {
     padding: '20px 24px',
-    borderBottom: `1px solid #e5e7eb`,
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    borderBottom: '1px solid #e5e7eb',
   },
 
   logo: {
     borderRadius: '6px',
   },
 
-  title: {
+  heading: {
     margin: 0,
     fontSize: '18px',
     fontWeight: 600,
@@ -159,14 +148,14 @@ const styles = {
     padding: '24px',
   },
 
-  field: {
+  row: {
     marginBottom: '14px',
   },
 
   label: {
     fontSize: '12px',
+    letterSpacing: '0.05em',
     textTransform: 'uppercase',
-    letterSpacing: '0.06em',
     color: '#6b7280',
     marginBottom: '2px',
   },
@@ -190,7 +179,7 @@ const styles = {
 
   messageBox: {
     backgroundColor: '#f9fafb',
-    border: `1px solid #e5e7eb`,
+    border: '1px solid #e5e7eb',
     borderLeft: `4px solid ${BRAND}`,
     borderRadius: '8px',
     padding: '16px',

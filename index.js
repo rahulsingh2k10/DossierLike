@@ -253,7 +253,7 @@ async function getGeo(ip) {
 ========================= */
 async function sendContactFormEmail(name, email, subject, message) {
   await resend.emails.send({
-    from: 'Portfolio <no-reply@rahulsingh.ai>',
+    from: 'Rahul Singh\'s Portfolio <dossier@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
