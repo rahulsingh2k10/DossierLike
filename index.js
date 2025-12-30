@@ -256,7 +256,7 @@ async function sendContactFormEmail(name, email, subject, message) {
     from: 'Rahul Singh\'s Portfolio <no-reply@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
-    subject: `Portfolio Contact: ${subject}`,
+    subject: `Let's Connect: ${subject}`,
     react: ContactFormEmail({
       name,
       email,

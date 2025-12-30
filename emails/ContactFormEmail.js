@@ -47,7 +47,7 @@ export default function ContactFormEmail({
             React.createElement(
               Heading,
               { style: styles.heading },
-              'New Contact Submission'
+              'Let\'s Connect Submission'
             )
           )
         ),
