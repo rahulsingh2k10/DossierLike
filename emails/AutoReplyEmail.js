@@ -36,15 +36,15 @@ export default function AutoReplyEmail({
             { style: styles.headerInner },
             React.createElement(Img, {
               src: 'https://rahulsingh.ai/logo.png',
-              width: 36,
-              height: 36,
+              width: 48,
+              height: 48,
               alt: 'Rahul Singh',
               style: styles.logo,
             }),
             React.createElement(
               Heading,
               { style: styles.heading },
-              'Thank You for Reaching Out'
+              'Appreciate You For Connecting With Me'
             )
           )
         ),
@@ -63,13 +63,13 @@ export default function AutoReplyEmail({
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'Thank you for reaching out to me. I truly appreciate you taking the initiative to connect.'
+            'I appreciate you reaching out and taking the proactive step to connect with me.'
           ),
 
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'I have received your email and will review it at the earliest opportunity. In the interim, I would be delighted to connect with you on LinkedIn. Please feel free to visit my profile and send me a connection request so we can stay in touch.'
+            'I have received your email and will review it at the earliest opportunity. In the meantime, I’d be happy to connect with you on LinkedIn so we can stay in touch, exchange insights, and learn more about each other’s work.
           ),
 
           React.createElement(
@@ -88,8 +88,10 @@ export default function AutoReplyEmail({
           React.createElement(
             Text,
             { style: styles.signature },
-            'I look forward to responding to you shortly.',
+            'I look forward to continuing our conversation soon.',
             React.createElement('br'),
+            React.createElement('br'),
+            React.createElement('span', null, 'Thanks and regards,'),
             React.createElement('br'),
             React.createElement('strong', null, 'Rahul Singh')
           )
