@@ -22,7 +22,18 @@ export default function ContactFormEmail({
   return React.createElement(
     Html,
     { lang: 'en' },
-    React.createElement(Head, null),
+    React.createElement(
+      Head,
+      null,
+      React.createElement('meta', {
+        name: 'color-scheme',
+        content: 'light dark',
+      }),
+      React.createElement('meta', {
+        name: 'supported-color-schemes',
+        content: 'light dark',
+      })
+    ),
     React.createElement(
       Body,
       { style: styles.body },
@@ -31,21 +42,16 @@ export default function ContactFormEmail({
         Container,
         { style: styles.container },
 
-        /* =====================
-           HEADER
-        ===================== */
+        /* ================= HEADER ================= */
         React.createElement(
           Section,
           { style: styles.header },
-
           React.createElement(
             'table',
             { width: '100%', cellPadding: 0, cellSpacing: 0 },
             React.createElement(
               'tr',
               null,
-
-              // Logo (Top Left)
               React.createElement(
                 'td',
                 { style: styles.logoCell },
@@ -57,8 +63,6 @@ export default function ContactFormEmail({
                   style: styles.logo,
                 })
               ),
-
-              // Title
               React.createElement(
                 'td',
                 { style: styles.headerTextCell },
@@ -72,29 +76,21 @@ export default function ContactFormEmail({
           )
         ),
 
-        /* =====================
-           CONTENT
-        ===================== */
+        /* ================= CONTENT ================= */
         React.createElement(
           Section,
           { style: styles.content },
 
-          React.createElement(Text, { style: styles.label }, 'From'),
-          React.createElement(Text, { style: styles.value }, name),
-
-          React.createElement(Text, { style: styles.label }, 'Email'),
-          React.createElement(
-            Text,
-            { style: styles.value },
+          labelValue('From', name),
+          labelValue(
+            'Email',
             React.createElement(
               Link,
               { href: `mailto:${email}`, style: styles.link },
               email
             )
           ),
-
-          React.createElement(Text, { style: styles.label }, 'Subject'),
-          React.createElement(Text, { style: styles.value }, subject),
+          labelValue('Subject', subject),
 
           React.createElement(Hr, { style: styles.divider }),
 
@@ -105,9 +101,7 @@ export default function ContactFormEmail({
           )
         ),
 
-        /* =====================
-           FOOTER
-        ===================== */
+        /* ================= FOOTER ================= */
         React.createElement(
           Section,
           { style: styles.footer },
@@ -118,7 +112,7 @@ export default function ContactFormEmail({
           ),
           React.createElement(
             Text,
-            { style: styles.footerTextMuted },
+            { style: styles.footerMuted },
             `© ${year} Rahul Singh. All rights reserved.`
           )
         )
@@ -127,23 +121,31 @@ export default function ContactFormEmail({
   );
 }
 
-/* =====================
-   STYLES
-===================== */
+/* ================= Helpers ================= */
+function labelValue(label, value) {
+  return React.createElement(
+    Section,
+    { style: styles.block },
+    React.createElement(Text, { style: styles.label }, label),
+    React.createElement(Text, { style: styles.value }, value)
+  );
+}
+
+/* ================= Styles ================= */
 const styles = {
   body: {
-    backgroundColor: '#0b0f1a',
+    backgroundColor: '#f4f6f8',
+    color: '#111827',
     padding: '32px',
     fontFamily:
-      'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+      '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
   },
 
   container: {
-    maxWidth: '600px',
-    backgroundColor: '#0f172a',
-    borderRadius: '16px',
+    backgroundColor: '#ffffff',
+    borderRadius: '14px',
     overflow: 'hidden',
-    boxShadow: '0 20px 40px rgba(0,0,0,0.45)',
+    maxWidth: '600px',
   },
 
   /* Header */
@@ -162,8 +164,8 @@ const styles = {
   },
 
   headerTextCell: {
-    verticalAlign: 'middle',
     paddingLeft: '12px',
+    verticalAlign: 'middle',
   },
 
   headerTitle: {
@@ -171,43 +173,48 @@ const styles = {
     fontSize: '20px',
     fontWeight: 600,
     color: '#ffffff',
+    WebkitTextFillColor: '#ffffff',
   },
 
   /* Content */
   content: {
     padding: '28px',
-    color: '#e5e7eb',
+    backgroundColor: '#ffffff',
+    color: '#111827',
+  },
+
+  block: {
+    marginBottom: '16px',
   },
 
   label: {
     fontSize: '12px',
     textTransform: 'uppercase',
     letterSpacing: '0.08em',
-    color: '#9ca3af',
-    marginBottom: '4px',
+    color: '#6b7280',
   },
 
   value: {
     fontSize: '15px',
-    marginTop: 0,
-    marginBottom: '16px',
-    color: '#f9fafb',
+    color: '#111827',
+    margin: 0,
+    WebkitTextFillColor: '#111827',
   },
 
   link: {
-    color: '#a78bfa',
+    color: '#4f46e5',
     textDecoration: 'none',
   },
 
   divider: {
-    borderColor: '#1f2937',
+    borderColor: '#e5e7eb',
     margin: '24px 0',
   },
 
   messageBox: {
-    backgroundColor: '#020617',
+    backgroundColor: '#f9fafb',
     borderLeft: '4px solid #7c3aed',
-    padding: '18px',
+    padding: '16px',
     borderRadius: '8px',
   },
 
@@ -215,26 +222,23 @@ const styles = {
     fontSize: '15px',
     lineHeight: '1.7',
     whiteSpace: 'pre-wrap',
-    color: '#e5e7eb',
-    margin: 0,
+    color: '#111827',
   },
 
   /* Footer */
   footer: {
-    backgroundColor: '#020617',
+    backgroundColor: '#f9fafb',
     padding: '18px',
     textAlign: 'center',
   },
 
   footerText: {
     fontSize: '12px',
-    color: '#9ca3af',
-    margin: 0,
+    color: '#6b7280',
   },
 
-  footerTextMuted: {
+  footerMuted: {
     fontSize: '11px',
-    color: '#6b7280',
-    marginTop: '6px',
+    color: '#9ca3af',
   },
 };
