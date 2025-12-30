@@ -275,7 +275,7 @@ async function sendContactFormEmail(name, email, subject, message) {
   `;
 
   await resend.emails.send({
-    from: 'Portfolio <onboarding@resend.dev>', // Use your verified domain later
+    from: 'Portfolio <no-reply@rahulsingh.ai>', // Use your verified domain later
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
@@ -311,8 +311,9 @@ async function sendAutoReplyEmail(recipientEmail, recipientName) {
   `;
 
   await resend.emails.send({
-    from: 'Rahul Singh <rahulsingh2k10@gmail.com>', // Use your verified domain later
+    from: 'Rahul Singh <onboarding@resend.dev>', // Use your verified domain later
     to: recipientEmail,
+    replyTo: email,
     subject: 'Thank you for your message - Rahul Singh',
     html: htmlContent
   });
