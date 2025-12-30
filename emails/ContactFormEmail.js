@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Html,
   Head,
@@ -17,67 +18,73 @@ export default function ContactFormEmail({
   message,
   year,
 }) {
-  return (
-    <Html>
-      <Head />
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          
-          {/* Header */}
-          <Section style={styles.header}>
-            <Heading style={styles.headerText}>
-              New Contact Form Submission
-            </Heading>
-          </Section>
+  return React.createElement(
+    Html,
+    null,
+    React.createElement(Head, null),
+    React.createElement(
+      Body,
+      { style: styles.body },
+      React.createElement(
+        Container,
+        { style: styles.container },
 
-          {/* Content */}
-          <Section style={styles.content}>
-            <Heading as="h2" style={styles.sectionTitle}>
-              Contact Information
-            </Heading>
+        // Header
+        React.createElement(
+          Section,
+          { style: styles.header },
+          React.createElement(
+            Heading,
+            { style: styles.headerText },
+            'New Contact Form Submission'
+          )
+        ),
 
-            <Text><strong>Name:</strong> {name}</Text>
-            <Text>
-              <strong>Email:</strong>{' '}
-              <Link href={`mailto:${email}`} style={styles.link}>
-                {email}
-              </Link>
-            </Text>
-            <Text><strong>Subject:</strong> {subject}</Text>
+        // Content
+        React.createElement(
+          Section,
+          { style: styles.content },
+          React.createElement(Text, null, `Name: ${name}`),
+          React.createElement(
+            Text,
+            null,
+            'Email: ',
+            React.createElement(Link, { href: `mailto:${email}` }, email)
+          ),
+          React.createElement(Text, null, `Subject: ${subject}`),
 
-            <Heading as="h2" style={styles.sectionTitle}>
-              Message
-            </Heading>
+          React.createElement(
+            Section,
+            { style: styles.messageBox },
+            React.createElement(Text, { style: styles.messageText }, message)
+          ),
 
-            <Section style={styles.messageBox}>
-              <Text style={styles.messageText}>{message}</Text>
-            </Section>
+          React.createElement(
+            Section,
+            { style: styles.buttonWrapper },
+            React.createElement(
+              Button,
+              { href: `mailto:${email}`, style: styles.button },
+              'Reply to Message'
+            )
+          )
+        ),
 
-            <Section style={styles.buttonWrapper}>
-              <Button href={`mailto:${email}`} style={styles.button}>
-                Reply to Message
-              </Button>
-            </Section>
-          </Section>
-
-          {/* Footer */}
-          <Section style={styles.footer}>
-            <Text>
-              This email was sent from your portfolio website contact form.
-            </Text>
-            <Text>© {year}</Text>
-          </Section>
-
-        </Container>
-      </Body>
-    </Html>
+        // Footer
+        React.createElement(
+          Section,
+          { style: styles.footer },
+          React.createElement(Text, null, 'This email was sent from your portfolio website contact form.'),
+          React.createElement(Text, null, `© ${year}`)
+        )
+      )
+    )
   );
 }
 
 const styles = {
   body: {
     backgroundColor: '#f4f6f8',
-    margin: 0,
     padding: '20px',
     fontFamily: 'Arial, sans-serif',
   },
@@ -100,24 +107,15 @@ const styles = {
     padding: '24px',
     color: '#333333',
   },
-  sectionTitle: {
-    fontSize: '16px',
-    marginTop: '20px',
-    marginBottom: '10px',
-  },
-  link: {
-    color: '#4f46e5',
-    textDecoration: 'none',
-  },
   messageBox: {
     backgroundColor: '#f1f3f5',
     padding: '16px',
     borderLeft: '4px solid #4f46e5',
+    marginTop: '16px',
   },
   messageText: {
     whiteSpace: 'pre-wrap',
     lineHeight: '1.6',
-    margin: 0,
   },
   buttonWrapper: {
     textAlign: 'center',
