@@ -286,23 +286,39 @@ async function getGeo(ip) {
 //   });
 // }
 
-async function sendContactFormEmail(name, email, subject, message) {
-  const htmlContent = render(
-    ContactFormEmail({
-      name,
-      email,
-      subject,
-      message,
-      year: new Date().getFullYear(),
-    })
-  );
+// async function sendContactFormEmail(name, email, subject, message) {
+//   const htmlContent = render(
+//     ContactFormEmail({
+//       name,
+//       email,
+//       subject,
+//       message,
+//       year: new Date().getFullYear(),
+//     })
+//   );
+// 
+//   await resend.emails.send({
+//     from: 'Portfolio <no-reply@rahulsingh.ai>',
+//     to: RECIPIENT_EMAIL,
+//     replyTo: email,
+//     subject: `Portfolio Contact: ${subject}`,
+//     html: htmlContent,
+//   });
+// }
 
+async function sendContactFormEmail(name, email, subject, message) {
   await resend.emails.send({
     from: 'Portfolio <no-reply@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
-    html: htmlContent,
+    react: ContactFormEmail({
+      name,
+      email,
+      subject,
+      message,
+      year: new Date().getFullYear(),
+    }),
   });
 }
 
