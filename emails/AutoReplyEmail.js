@@ -112,8 +112,6 @@ export default function AutoReplyEmail({ recipientName = 'there' }) {
   );
 }
 
-module.exports = AutoReplyEmail;
-
 /* ---------------- Styles ---------------- */
 
 const styles = {
