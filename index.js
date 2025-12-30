@@ -253,7 +253,7 @@ async function getGeo(ip) {
 ========================= */
 async function sendContactFormEmail(name, email, subject, message) {
   await resend.emails.send({
-    from: 'Rahul Singh\'s Portfolio <dossier@rahulsingh.ai>',
+    from: 'Rahul Singh\'s Portfolio <no-reply@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Portfolio Contact: ${subject}`,
@@ -401,14 +401,14 @@ app.post('/api/contact', async (req, res) => {
     console.log(`Contact form email sent from ${name} <${email}>`);
 
     // Send auto-reply to sender (don't fail if this fails)
-    try {
-      console.log('Sending Email To::', email);
-
-      await sendAutoReplyEmail(email, name);
-      console.log(`Auto-reply sent to ${email}`);
-    } catch (autoReplyErr) {
-      console.error('Auto-reply failed:', autoReplyErr.message);
-    }
+//     try {
+//       console.log('Sending Email To::', email);
+// 
+//       await sendAutoReplyEmail(email, name);
+//       console.log(`Auto-reply sent to ${email}`);
+//     } catch (autoReplyErr) {
+//       console.error('Auto-reply failed:', autoReplyErr.message);
+//     }
 
     res.json({
       status: 'success',
