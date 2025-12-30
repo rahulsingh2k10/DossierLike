@@ -30,7 +30,7 @@ const {
   DATABASE_URL,
   SECRET_KEY,
   RESEND_API_KEY,
-  RECIPIENT_EMAIL = 'rahulsingh2k10@gmail.com',
+  RECIPIENT_EMAIL,
   PORT = 3000
 } = process.env;
 
@@ -254,7 +254,7 @@ async function getGeo(ip) {
 ========================= */
 async function sendContactFormEmail(name, email, subject, message) {
   await resend.emails.send({
-    from: 'Rahul Singh\'s Portfolio <no-reply@rahulsingh.ai>',
+    from: 'Rahul Singh\'s Portfolio <support@rahulsingh.ai>',
     to: RECIPIENT_EMAIL,
     replyTo: email,
     subject: `Let's Connect: ${subject}`,

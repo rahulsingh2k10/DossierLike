@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Html,
   Head,
@@ -87,12 +88,12 @@ export default function ContactFormEmail({
           React.createElement(
             Text,
             null,
-            'This email was sent from your portfolio website contact form.'
+            'This email was sent from your portfolio website.'
           ),
           React.createElement(
           	Text,
           	null,
-          	`${year} Rahul Singh. All rights reserved.`
+          	`${year} Rahul Singh. All Rights Reserved.`
           )
         )
       )

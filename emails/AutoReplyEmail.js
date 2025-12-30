@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Html,
   Head,
@@ -91,7 +92,7 @@ export default function AutoReplyEmail({
             'I look forward to continuing our conversation soon.',
             React.createElement('br'),
             React.createElement('br'),
-            React.createElement('span', null, 'Thanks and regards,'),
+            React.createElement('span', null, 'Thanks And Regards,'),
             React.createElement('br'),
             React.createElement('strong', null, 'Rahul Singh')
           )
@@ -106,12 +107,12 @@ export default function AutoReplyEmail({
           React.createElement(
             Text,
             null,
-            'This is an automated acknowledgment confirming receipt of your message.'
+            'This is an automated message to confirm that your message has been received.'
           ),
           React.createElement(
             Text,
             null,
-            `${year} Rahul Singh. All rights reserved.`
+            `${year} Rahul Singh. All Rights Reserved.`
           )
         )
       )
