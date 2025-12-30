@@ -14,6 +14,7 @@ import { UAParser } from 'ua-parser-js';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContactFormEmail from './emails/ContactFormEmail.js';
+import AutoReplyEmail from './emails/AutoReplyEmail.js';
 
 const { Pool } = pg;
 const app = express();
@@ -263,7 +264,7 @@ async function sendContactFormEmail(name, email, subject, message) {
       subject,
       message,
       year: new Date().getFullYear(),
-    }),
+    })
   });
 }
 
@@ -271,38 +272,14 @@ async function sendContactFormEmail(name, email, subject, message) {
    AUTO-REPLY EMAIL
 ========================= */
 async function sendAutoReplyEmail(recipientEmail, recipientName) {
-  const htmlContent = `
-    <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
-            Thank you for reaching out!
-          </h2>
-          <p>Hi ${recipientName},</p>
-          <p>Thank you for contacting me through my portfolio website. I've received your message and will get back to you as soon as possible.</p>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #2c3e50; margin-top: 0;">What happens next?</h3>
-            <ul style="padding-left: 20px;">
-              <li>I'll review your message carefully</li>
-              <li>I typically respond within 24-48 hours</li>
-              <li>If it's urgent, feel free to connect with me on LinkedIn</li>
-            </ul>
-          </div>
-          <p>Best regards,<br><strong>Rahul Singh</strong><br>Principal Software Engineer</p>
-        </div>
-      </body>
-    </html>
-  `;
-
   await resend.emails.send({
-    from: 'Portfolio <no-reply@rahulsingh.ai>',
+    from: 'Rahul Singh\'s Portfolio <no-reply@rahulsingh.ai>',
     to: recipientEmail,
     replyTo: RECIPIENT_EMAIL,
     subject: 'Thank you for your message - Rahul Singh',
-    html: htmlContent
+    react: AutoReplyEmail({ recipientName })
   });
 }
-
 
 /* =========================
    ROUTES
@@ -401,14 +378,14 @@ app.post('/api/contact', async (req, res) => {
     console.log(`Contact form email sent from ${name} <${email}>`);
 
     // Send auto-reply to sender (don't fail if this fails)
-//     try {
-//       console.log('Sending Email To::', email);
-// 
-//       await sendAutoReplyEmail(email, name);
-//       console.log(`Auto-reply sent to ${email}`);
-//     } catch (autoReplyErr) {
-//       console.error('Auto-reply failed:', autoReplyErr.message);
-//     }
+    try {
+      console.log('Sending Email To::', email);
+
+      await sendAutoReplyEmail(email, name);
+      console.log(`Auto-reply sent to ${email}`);
+    } catch (autoReplyErr) {
+      console.error('Auto-reply failed:', autoReplyErr.message);
+    }
 
     res.json({
       status: 'success',
