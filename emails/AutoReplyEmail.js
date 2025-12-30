@@ -8,82 +8,105 @@ import {
   Text,
   Heading,
   Link,
-  Button,
   Img,
   Hr,
 } from '@react-email/components';
 
-export default function AutoReplyEmail({ recipientName = 'there' }) {
+export default function AutoReplyEmail({
+  recipientName = 'there',
+  year = new Date().getFullYear(),
+}) {
   return React.createElement(
     Html,
     null,
     React.createElement(Head, null),
     React.createElement(
       Body,
-      { style: styles.main },
+      { style: styles.body },
       React.createElement(
         Container,
         { style: styles.container },
 
-        /* Header */
+        /* ================= HEADER ================= */
         React.createElement(
           Section,
           { style: styles.header },
           React.createElement(
-            Heading,
-            { style: styles.headerText },
-            'Thank you for getting in touch'
+            'div',
+            { style: styles.headerInner },
+            React.createElement(Img, {
+              src: 'https://rahulsingh.ai/logo.png',
+              width: 36,
+              height: 36,
+              alt: 'Rahul Singh',
+              style: styles.logo,
+            }),
+            React.createElement(
+              Heading,
+              { style: styles.heading },
+              'Thanks for Reaching Out'
+            )
           )
         ),
 
-        /* Content */
+        /* ================= CONTENT ================= */
         React.createElement(
           Section,
           { style: styles.content },
 
-          React.createElement(Text, { style: styles.paragraph }, `Hi ${recipientName},`),
-
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'Thank you for reaching out through my portfolio website. I’ve received your message and appreciate you taking the time to connect.'
+            `Hi ${recipientName},`
           ),
 
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'I personally review all messages and will respond as soon as possible.'
+            'Thank you for contacting me through my portfolio website. I’ve successfully received your message and appreciate you taking the time to connect.'
+          ),
+
+          React.createElement(
+            Text,
+            { style: styles.paragraph },
+            'I personally review all inquiries and will get back to you as soon as possible.'
           ),
 
           React.createElement(
             Section,
             { style: styles.infoBox },
-            React.createElement(Text, { style: styles.infoTitle }, 'What happens next?'),
+            React.createElement(
+              Text,
+              { style: styles.infoTitle },
+              'What happens next?'
+            ),
             React.createElement(
               'ul',
               { style: styles.list },
-              React.createElement('li', { style: styles.listItem }, 'Your message will be reviewed carefully'),
-              React.createElement('li', { style: styles.listItem }, 'You can expect a response within 24–48 hours'),
-			  React.createElement(
-			  'li',
-			  { style: styles.listItem },
-			  'For professional networking, feel free to connect with me on ',
-			  React.createElement(
-				'a',
-				{
-				  href: 'https://www.linkedin.com/in/rahulsingh05/',
-				  target: '_blank',
-				  rel: 'noopener noreferrer',
-				  style: {
-					color: '#0a66c2',
-					textDecoration: 'none',
-					fontWeight: 'bold',
-				  },
-				},
-				'LinkedIn'
-			  ),
-			  '.'
-			)
+              React.createElement(
+                'li',
+                { style: styles.listItem },
+                'Your message has been successfully received'
+              ),
+              React.createElement(
+                'li',
+                { style: styles.listItem },
+                'You can expect a response within 24–48 hours'
+              ),
+              React.createElement(
+                'li',
+                { style: styles.listItem },
+                'For professional networking, feel free to connect with me on ',
+                React.createElement(
+                  Link,
+                  {
+                    href: 'https://www.linkedin.com/in/rahulsingh05/',
+                    style: styles.link,
+                  },
+                  'LinkedIn'
+                ),
+                '.'
+              )
             )
           ),
 
@@ -98,14 +121,19 @@ export default function AutoReplyEmail({ recipientName = 'there' }) {
 
         React.createElement(Hr, { style: styles.divider }),
 
-        /* Footer */
+        /* ================= FOOTER ================= */
         React.createElement(
           Section,
-          null,
+          { style: styles.footer },
           React.createElement(
             Text,
-            { style: styles.footer },
+            null,
             'This is an automated acknowledgment confirming receipt of your message.'
+          ),
+          React.createElement(
+            Text,
+            null,
+            `${year} Rahul Singh. All rights reserved.`
           )
         )
       )
@@ -113,70 +141,101 @@ export default function AutoReplyEmail({ recipientName = 'there' }) {
   );
 }
 
-/* ---------------- Styles ---------------- */
+/* ================= STYLES ================= */
 
 const styles = {
-  main: {
+  body: {
     backgroundColor: '#f4f6f8',
-    fontFamily: 'Arial, Helvetica, sans-serif',
+    padding: '24px',
+    fontFamily: 'Inter, Arial, sans-serif',
   },
+
   container: {
     backgroundColor: '#ffffff',
-    borderRadius: '8px',
-    margin: '40px auto',
-    maxWidth: '600px',
-    padding: '0',
+    borderRadius: '10px',
+    overflow: 'hidden',
+    border: '1px solid #e5e7eb',
   },
+
+  /* Header */
   header: {
-    backgroundColor: '#2c3e50',
-    padding: '20px',
-    borderTopLeftRadius: '8px',
-    borderTopRightRadius: '8px',
+    padding: '20px 24px',
+    backgroundColor: '#4f46e5',
+    textAlign: 'center',
   },
-  headerText: {
+
+  headerInner: {
+    display: 'inline-block',
+    textAlign: 'center',
+  },
+
+  logo: {
+    display: 'block',
+    margin: '0 auto 8px auto',
+  },
+
+  heading: {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: 600,
     color: '#ffffff',
-    fontSize: '22px',
-    fontWeight: 'normal',
-    margin: '0',
   },
+
+  /* Content */
   content: {
     padding: '24px',
-  },
-  paragraph: {
+    color: '#111827',
     fontSize: '14px',
     lineHeight: '1.6',
-    color: '#333333',
   },
+
+  paragraph: {
+    marginBottom: '14px',
+  },
+
+  link: {
+    color: '#4f46e5',
+    textDecoration: 'none',
+    fontWeight: 500,
+  },
+
   infoBox: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: '6px',
+    backgroundColor: '#f1f3f5',
     padding: '16px',
+    borderLeft: '4px solid #4f46e5',
     margin: '20px 0',
+    borderRadius: '4px',
   },
+
   infoTitle: {
-    fontSize: '14px',
-    fontWeight: 'bold',
+    fontWeight: 600,
     marginBottom: '8px',
   },
+
   list: {
     paddingLeft: '20px',
-    margin: '0',
+    margin: 0,
   },
+
   listItem: {
-    fontSize: '13px',
     marginBottom: '6px',
   },
+
   signature: {
-    fontSize: '14px',
     marginTop: '20px',
+    fontSize: '14px',
   },
+
   divider: {
-    borderColor: '#eaeaea',
+    borderColor: '#e5e7eb',
   },
+
+  /* Footer */
   footer: {
-    fontSize: '12px',
-    color: '#777777',
+    backgroundColor: '#f9fafb',
+    padding: '16px',
     textAlign: 'center',
-    padding: '12px 24px 20px',
+    fontSize: '12px',
+    color: '#6b7280',
   },
 };
