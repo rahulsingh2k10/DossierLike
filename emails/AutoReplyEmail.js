@@ -44,7 +44,7 @@ export default function AutoReplyEmail({
             React.createElement(
               Heading,
               { style: styles.heading },
-              'Thanks for Reaching Out'
+              'Thank You for Reaching Out'
             )
           )
         ),
@@ -63,57 +63,33 @@ export default function AutoReplyEmail({
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'Thank you for contacting me through my portfolio website. I’ve successfully received your message and appreciate you taking the time to connect.'
+            'Thank you for reaching out to me. I truly appreciate you taking the initiative to connect.'
           ),
 
           React.createElement(
             Text,
             { style: styles.paragraph },
-            'I personally review all inquiries and will get back to you as soon as possible.'
+            'I have received your email and will review it at the earliest opportunity. In the interim, I would be delighted to connect with you on LinkedIn. Please feel free to visit my profile and send me a connection request so we can stay in touch.'
           ),
 
           React.createElement(
-            Section,
-            { style: styles.infoBox },
+            Text,
+            { style: styles.paragraph },
             React.createElement(
-              Text,
-              { style: styles.infoTitle },
-              'What happens next?'
-            ),
-            React.createElement(
-              'ul',
-              { style: styles.list },
-              React.createElement(
-                'li',
-                { style: styles.listItem },
-                'Your message has been successfully received'
-              ),
-              React.createElement(
-                'li',
-                { style: styles.listItem },
-                'You can expect a response within 24–48 hours'
-              ),
-              React.createElement(
-                'li',
-                { style: styles.listItem },
-                'For professional networking, feel free to connect with me on ',
-                React.createElement(
-                  Link,
-                  {
-                    href: 'https://www.linkedin.com/in/rahulsingh05/',
-                    style: styles.link,
-                  },
-                  'LinkedIn'
-                ),
-                '.'
-              )
+              Link,
+              {
+                href: 'https://www.linkedin.com/in/rahulsingh05/',
+                style: styles.link,
+              },
+              'View my LinkedIn profile'
             )
           ),
 
           React.createElement(
             Text,
             { style: styles.signature },
-            React.createElement('span', null, 'Best regards,'),
+            'I look forward to responding to you shortly.',
+            React.createElement('br'),
             React.createElement('br'),
             React.createElement('strong', null, 'Rahul Singh')
           )
@@ -197,28 +173,6 @@ const styles = {
     color: '#4f46e5',
     textDecoration: 'none',
     fontWeight: 500,
-  },
-
-  infoBox: {
-    backgroundColor: '#f1f3f5',
-    padding: '16px',
-    borderLeft: '4px solid #4f46e5',
-    margin: '20px 0',
-    borderRadius: '4px',
-  },
-
-  infoTitle: {
-    fontWeight: 600,
-    marginBottom: '8px',
-  },
-
-  list: {
-    paddingLeft: '20px',
-    margin: 0,
-  },
-
-  listItem: {
-    marginBottom: '6px',
   },
 
   signature: {
