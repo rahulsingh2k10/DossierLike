@@ -13,7 +13,7 @@ import axios from 'axios';
 import UAParser from 'ua-parser-js';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
-import ContactFormEmail from './emails/ContactFormEmail.js';
+import ContactFormEmail from './emails/ContactFormEmail.jsx';
 
 const { Pool } = pg;
 const app = express();
