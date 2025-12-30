@@ -1,5 +1,5 @@
-const React = require('react');
-const {
+import React from 'react';
+import {
   Html,
   Head,
   Body,
@@ -7,8 +7,10 @@ const {
   Section,
   Text,
   Heading,
-  Hr,
-} = require('@react-email/components');
+  Link,
+  Button,
+  Img,
+} from '@react-email/components';
 
 export default function AutoReplyEmail({ recipientName = 'there' }) {
   return React.createElement(
