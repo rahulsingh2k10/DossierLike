@@ -37,8 +37,8 @@ export default function ContactFormEmail({
           { style: styles.header },
           React.createElement(Img, {
             src: 'https://rahulsingh.ai/logo.png',
-            width: 36,
-            height: 36,
+            width: 48,
+            height: 48,
             alt: 'Rahul Singh',
             style: styles.logo,
           }),
@@ -81,12 +81,12 @@ export default function ContactFormEmail({
           React.createElement(
             Text,
             { style: styles.footerText },
-            'Sent from your portfolio contact form'
+            'This message was sent from your portfolio contact form.'
           ),
           React.createElement(
             Text,
             { style: styles.footerMuted },
-            `© ${year} Rahul Singh`
+            `${year} Rahul Singh. All rights reserved.`
           )
         )
       )
