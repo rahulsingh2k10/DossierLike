@@ -42,47 +42,31 @@ export default function ContactFormEmail({
         Container,
         { style: styles.container },
 
-        /* ================= HEADER ================= */
+        /* ================= Header ================= */
         React.createElement(
           Section,
           { style: styles.header },
+          React.createElement(Img, {
+            src: 'https://rahulsingh.ai/logo.png',
+            width: 32,
+            height: 32,
+            alt: 'Rahul Singh',
+            style: styles.logo,
+          }),
           React.createElement(
-            'table',
-            { width: '100%', cellPadding: 0, cellSpacing: 0 },
-            React.createElement(
-              'tr',
-              null,
-              React.createElement(
-                'td',
-                { style: styles.logoCell },
-                React.createElement(Img, {
-                  src: 'https://rahulsingh.ai/logo.png',
-                  width: 36,
-                  height: 36,
-                  alt: 'Rahul Singh',
-                  style: styles.logo,
-                })
-              ),
-              React.createElement(
-                'td',
-                { style: styles.headerTextCell },
-                React.createElement(
-                  Heading,
-                  { style: styles.headerTitle },
-                  'New Contact Submission'
-                )
-              )
-            )
+            Heading,
+            { style: styles.title },
+            'New Contact Message'
           )
         ),
 
-        /* ================= CONTENT ================= */
+        /* ================= Content ================= */
         React.createElement(
           Section,
           { style: styles.content },
 
-          labelValue('From', name),
-          labelValue(
+          field('Name', name),
+          field(
             'Email',
             React.createElement(
               Link,
@@ -90,30 +74,30 @@ export default function ContactFormEmail({
               email
             )
           ),
-          labelValue('Subject', subject),
+          field('Subject', subject),
 
           React.createElement(Hr, { style: styles.divider }),
 
           React.createElement(
             Section,
             { style: styles.messageBox },
-            React.createElement(Text, { style: styles.messageText }, message)
+            React.createElement(Text, { style: styles.message }, message)
           )
         ),
 
-        /* ================= FOOTER ================= */
+        /* ================= Footer ================= */
         React.createElement(
           Section,
           { style: styles.footer },
           React.createElement(
             Text,
             { style: styles.footerText },
-            'This message was sent from your portfolio contact form.'
+            'Sent from your portfolio contact form'
           ),
           React.createElement(
             Text,
             { style: styles.footerMuted },
-            `© ${year} Rahul Singh. All rights reserved.`
+            `© ${year} Rahul Singh`
           )
         )
       )
@@ -121,124 +105,121 @@ export default function ContactFormEmail({
   );
 }
 
-/* ================= Helpers ================= */
-function labelValue(label, value) {
+/* ================= Helper ================= */
+function field(label, value) {
   return React.createElement(
     Section,
-    { style: styles.block },
+    { style: styles.field },
     React.createElement(Text, { style: styles.label }, label),
     React.createElement(Text, { style: styles.value }, value)
   );
 }
 
 /* ================= Styles ================= */
+const BRAND = '#4f46e5'; // your original theme color
+
 const styles = {
   body: {
     backgroundColor: '#f4f6f8',
-    color: '#111827',
     padding: '32px',
     fontFamily:
       '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
   },
 
   container: {
-    backgroundColor: '#ffffff',
-    borderRadius: '14px',
-    overflow: 'hidden',
     maxWidth: '600px',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    border: '1px solid #e5e7eb',
   },
 
   /* Header */
   header: {
-    background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
     padding: '20px 24px',
-  },
-
-  logoCell: {
-    width: '44px',
-    verticalAlign: 'middle',
+    borderBottom: `1px solid #e5e7eb`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
   },
 
   logo: {
-    borderRadius: '8px',
+    borderRadius: '6px',
   },
 
-  headerTextCell: {
-    paddingLeft: '12px',
-    verticalAlign: 'middle',
-  },
-
-  headerTitle: {
+  title: {
     margin: 0,
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: 600,
-    color: '#ffffff',
-    WebkitTextFillColor: '#ffffff',
+    color: '#111827',
   },
 
   /* Content */
   content: {
-    padding: '28px',
-    backgroundColor: '#ffffff',
-    color: '#111827',
+    padding: '24px',
   },
 
-  block: {
-    marginBottom: '16px',
+  field: {
+    marginBottom: '14px',
   },
 
   label: {
     fontSize: '12px',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    letterSpacing: '0.06em',
     color: '#6b7280',
+    marginBottom: '2px',
   },
 
   value: {
     fontSize: '15px',
     color: '#111827',
     margin: 0,
-    WebkitTextFillColor: '#111827',
   },
 
   link: {
-    color: '#4f46e5',
+    color: BRAND,
     textDecoration: 'none',
+    fontWeight: 500,
   },
 
   divider: {
     borderColor: '#e5e7eb',
-    margin: '24px 0',
+    margin: '20px 0',
   },
 
   messageBox: {
     backgroundColor: '#f9fafb',
-    borderLeft: '4px solid #7c3aed',
-    padding: '16px',
+    border: `1px solid #e5e7eb`,
+    borderLeft: `4px solid ${BRAND}`,
     borderRadius: '8px',
+    padding: '16px',
   },
 
-  messageText: {
+  message: {
     fontSize: '15px',
     lineHeight: '1.7',
     whiteSpace: 'pre-wrap',
     color: '#111827',
+    margin: 0,
   },
 
   /* Footer */
   footer: {
-    backgroundColor: '#f9fafb',
-    padding: '18px',
+    padding: '16px',
+    borderTop: '1px solid #e5e7eb',
     textAlign: 'center',
   },
 
   footerText: {
     fontSize: '12px',
     color: '#6b7280',
+    margin: 0,
   },
 
   footerMuted: {
     fontSize: '11px',
     color: '#9ca3af',
+    marginTop: '4px',
   },
 };
