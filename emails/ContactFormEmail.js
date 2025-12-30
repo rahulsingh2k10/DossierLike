@@ -8,8 +8,8 @@ import {
   Text,
   Heading,
   Link,
+  Button,
   Img,
-  Hr,
 } from '@react-email/components';
 
 export default function ContactFormEmail({
@@ -21,109 +21,91 @@ export default function ContactFormEmail({
 }) {
   return React.createElement(
     Html,
-    { lang: 'en' },
+    null,
     React.createElement(Head, null),
     React.createElement(
       Body,
       { style: styles.body },
-
       React.createElement(
         Container,
         { style: styles.container },
 
-        /* ========= Header ========= */
-		React.createElement(
-		  Section,
-		  { style: styles.header },
-		  React.createElement(
-			'div',
-			{ style: styles.headerInner },
-		
-			React.createElement(Img, {
-			  src: 'https://rahulsingh.ai/logo.png',
-			  width: 48,
-			  height: 48,
-			  alt: 'Rahul Singh',
-			  style: styles.logo,
-			}),
-		
-			React.createElement(
-			  Heading,
-			  { style: styles.heading },
-			  'New Form Submission'
-			)
-		  )
-		)
+        /* ================= HEADER ================= */
+        React.createElement(
+          Section,
+          { style: styles.header },
+          React.createElement(
+            'div',
+            { style: styles.headerInner },
+            React.createElement(Img, {
+              src: 'https://rahulsingh.ai/logo.png',
+              width: 36,
+              height: 36,
+              alt: 'Rahul Singh',
+              style: styles.logo,
+            }),
+            React.createElement(
+              Heading,
+              { style: styles.heading },
+              'New Contact Submission'
+            )
+          )
+        ),
 
-
-        /* ========= Content ========= */
+        /* ================= CONTENT ================= */
         React.createElement(
           Section,
           { style: styles.content },
-
-          infoRow('Name', name),
-          infoRow(
-            'Email',
+          React.createElement(Text, null, `Name: ${name}`),
+          React.createElement(
+            Text,
+            null,
+            'Email: ',
             React.createElement(
               Link,
               { href: `mailto:${email}`, style: styles.link },
               email
             )
           ),
-          infoRow('Subject', subject),
-
-          React.createElement(Hr, { style: styles.divider }),
+          React.createElement(Text, null, `Subject: ${subject}`),
 
           React.createElement(
             Section,
             { style: styles.messageBox },
-            React.createElement(Text, { style: styles.message }, message)
+            React.createElement(
+              Text,
+              { style: styles.messageText },
+              message
+            )
           )
         ),
 
-        /* ========= Footer ========= */
+        /* ================= FOOTER ================= */
         React.createElement(
           Section,
           { style: styles.footer },
           React.createElement(
             Text,
-            { style: styles.footerText },
-            'This message was sent from your portfolio contact form.'
+            null,
+            'This email was sent from your portfolio website contact form.'
           ),
-          React.createElement(
-            Text,
-            { style: styles.footerMuted },
-            `${year} Rahul Singh. All rights reserved.`
-          )
+          React.createElement(Text, null, `© ${year} Rahul Singh`)
         )
       )
     )
   );
 }
 
-/* ========= Helper ========= */
-function infoRow(label, value) {
-  return React.createElement(
-    Section,
-    { style: styles.row },
-    React.createElement(Text, { style: styles.label }, label),
-    React.createElement(Text, { style: styles.value }, value)
-  );
-}
-
-/* ========= Theme ========= */
-const BRAND = '#4f46e5'; // your original indigo theme
+/* ================= STYLES ================= */
 
 const styles = {
   body: {
     backgroundColor: '#f4f6f8',
-    padding: '32px',
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+    padding: '24px',
+    fontFamily: 'Inter, Arial, sans-serif',
   },
 
   container: {
-    maxWidth: '600px',
     backgroundColor: '#ffffff',
     borderRadius: '10px',
     overflow: 'hidden',
@@ -133,7 +115,7 @@ const styles = {
   /* Header */
   header: {
     padding: '20px 24px',
-    borderBottom: '1px solid #e5e7eb',
+    backgroundColor: '#4f46e5',
     textAlign: 'center',
   },
 
@@ -143,84 +125,49 @@ const styles = {
   },
 
   logo: {
-    display: 'inline-block',
-    marginBottom: '8px',
+    display: 'block',
+    margin: '0 auto 8px auto',
   },
-  
+
   heading: {
-    display: 'inline-block',
     margin: 0,
     fontSize: '18px',
-  fontWeight: 600,
-    color: '#111827',
+    fontWeight: 600,
+    color: '#ffffff',
   },
 
   /* Content */
   content: {
     padding: '24px',
-  },
-
-  row: {
-    marginBottom: '14px',
-  },
-
-  label: {
-    fontSize: '12px',
-    letterSpacing: '0.05em',
-    textTransform: 'uppercase',
-    color: '#6b7280',
-    marginBottom: '2px',
-  },
-
-  value: {
-    fontSize: '15px',
     color: '#111827',
-    margin: 0,
+    fontSize: '14px',
+    lineHeight: '1.6',
   },
 
   link: {
-    color: BRAND,
+    color: '#4f46e5',
     textDecoration: 'none',
-    fontWeight: 500,
-  },
-
-  divider: {
-    borderColor: '#e5e7eb',
-    margin: '20px 0',
   },
 
   messageBox: {
-    backgroundColor: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderLeft: `4px solid ${BRAND}`,
-    borderRadius: '8px',
+    backgroundColor: '#f1f3f5',
     padding: '16px',
+    borderLeft: '4px solid #4f46e5',
+    marginTop: '16px',
+    borderRadius: '4px',
   },
 
-  message: {
-    fontSize: '15px',
-    lineHeight: '1.7',
-    whiteSpace: 'pre-wrap',
-    color: '#111827',
+  messageText: {
     margin: 0,
+    whiteSpace: 'pre-wrap',
   },
 
   /* Footer */
   footer: {
+    backgroundColor: '#f9fafb',
     padding: '16px',
-    borderTop: '1px solid #e5e7eb',
     textAlign: 'center',
-  },
-
-  footerText: {
     fontSize: '12px',
     color: '#6b7280',
-    margin: 0,
-  },
-
-  footerMuted: {
-    fontSize: '11px',
-    color: '#9ca3af',
-    marginTop: '4px',
   },
 };
