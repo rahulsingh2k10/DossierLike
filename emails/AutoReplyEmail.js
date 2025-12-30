@@ -10,6 +10,7 @@ import {
   Link,
   Button,
   Img,
+  Hr,
 } from '@react-email/components';
 
 export default function AutoReplyEmail({ recipientName = 'there' }) {
