@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import axios from 'axios';
-import UAParser from 'ua-parser-js';
+import { UAParser } from 'ua-parser-js';
 import { Resend } from 'resend';
 import { render } from '@react-email/render';
 import ContactFormEmail from './emails/ContactFormEmail.js';
