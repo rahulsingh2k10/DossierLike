@@ -89,7 +89,11 @@ export default function ContactFormEmail({
             null,
             'This email was sent from your portfolio website contact form.'
           ),
-          React.createElement(Text, null, `© ${year} Rahul Singh`)
+          React.createElement(
+          	Text,
+          	null,
+          	`${year} Rahul Singh. All rights reserved.`
+          )
         )
       )
     )
